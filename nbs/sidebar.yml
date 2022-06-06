@@ -1,0 +1,6 @@
+website:
+  sidebar:
+    contents:
+      - 01_nbio.ipynb
+      - 02_shell.ipynb
+      - index.ipynb

@@ -1,0 +1,42 @@
+ipynb-filters: [nbprocess_filter]
+
+project:
+  type: website
+  output-dir: docs
+  preview:
+    port: 3000
+    browser: false
+
+format:
+  html:
+    theme: cosmo
+    css: styles.css
+    toc: true
+
+website:
+  title: "execnb"
+  description: "A description of your project"
+  execute: 
+    enabled: false
+  twitter-card: true
+  open-graph: true
+  reader-mode: true
+  repo-branch: master
+  repo-url: https://github.com/fastai/execnb/tree/master/
+  repo-actions: [issue]
+  navbar:
+    background: primary
+    search: true
+    left:
+      - text: Home
+        file: index.ipynb
+    right:
+      - icon: github
+        href: https://github.com/fastai/execnb/tree/master/
+  sidebar:
+    style: "floating"
+
+metadata-files: 
+  - sidebar.yml
+  - custom.yml
+
