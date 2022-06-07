@@ -33,8 +33,9 @@ class _CapturePub(DisplayPublisher):
 def _out_exc(ename, evalue, traceback): return dict(ename=str(ename), evalue=str(evalue), output_type='error', traceback=traceback)
 def _out_stream(text): return dict(name='stdout', output_type='stream', text=text.splitlines(False))
 
-# %% ../nbs/02_shell.ipynb 6
+# %% ../nbs/02_shell.ipynb 7
 class CaptureShell(FastInteractiveShell):
+    "Execute the IPython/Jupyter source code"
     def __init__(self):
         super().__init__(displayhook_class=_CaptureHook, display_pub_class=_CapturePub)
         InteractiveShell._instance = self
@@ -62,7 +63,7 @@ class CaptureShell(FastInteractiveShell):
         text = std.getvalue()
         if text: self.out.append(_out_stream(text))
 
-# %% ../nbs/02_shell.ipynb 9
+# %% ../nbs/02_shell.ipynb 10
 @patch
 def run(self:CaptureShell, code:str, stdout=True, stderr=True):
     "runs `code`, returning a list of all outputs in Jupyter notebook format"
@@ -76,7 +77,7 @@ def run(self:CaptureShell, code:str, stdout=True, stderr=True):
     self._stream(stdout)
     return [*self.out]
 
-# %% ../nbs/02_shell.ipynb 18
+# %% ../nbs/02_shell.ipynb 19
 @patch
 def cell(self:CaptureShell, cell, stdout=True, stderr=True):
     "Run `cell`, skipping if not code, and store outputs back in cell"
@@ -87,18 +88,20 @@ def cell(self:CaptureShell, cell, stdout=True, stderr=True):
         for o in outs:
             if 'execution_count' in o: cell['execution_count'] = o['execution_count']
 
-# %% ../nbs/02_shell.ipynb 21
+# %% ../nbs/02_shell.ipynb 23
 @patch
-def run_all(self:CaptureShell, nb, exc_stop=False):
+def run_all(self:CaptureShell, nb, exc_stop=False, preproc=noop, postproc=noop):
     "Run all cells in `nb`, stopping at first exception if `exc_stop`"
     for cell in nb.cells:
-        self.cell(cell)
+        if not preproc(cell):
+            self.cell(cell)
+            postproc(cell)
         if self.exc and exc_stop: raise self.exc[1] from None
 
-# %% ../nbs/02_shell.ipynb 29
+# %% ../nbs/02_shell.ipynb 36
 @patch
-def execute(self:CaptureShell, src, dest, exc_stop=False):
+def execute(self:CaptureShell, src, dest, exc_stop=False, preproc=noop, postproc=noop):
     "Execute notebook from `src` and save with outputs to `dest"
     nb = read_nb(src)
-    self.run_all(nb, exc_stop=exc_stop)
+    self.run_all(nb, exc_stop=exc_stop, preproc=preproc, postproc=postproc)
     write_nb(nb, dest)
