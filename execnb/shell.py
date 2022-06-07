@@ -44,7 +44,7 @@ class CaptureShell(FastInteractiveShell):
     def __init__(self):
         super().__init__(displayhook_class=_CaptureHook, display_pub_class=_CapturePub)
         InteractiveShell._instance = self
-        self.result,self.out,self.count = None,[],1
+        self.exc,self.result,self.out,self.count = None,None,[],1
         self.run_cell('%matplotlib inline')
 
     def enable_gui(self, gui=None): pass
