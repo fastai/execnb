@@ -70,7 +70,10 @@ class CaptureShell(FastInteractiveShell):
 
 # %% ../nbs/02_shell.ipynb 10
 @patch
-def run(self:CaptureShell, code:str, stdout=True, stderr=True):
+def run(self:CaptureShell,
+        code:str, # Python/IPython code to run
+        stdout=True, # Capture stdout and save as output?
+        stderr=True): # Capture stderr and save as output?
     "runs `code`, returning a list of all outputs in Jupyter notebook format"
     self.exc = False
     self.out.clear()
@@ -117,7 +120,7 @@ def run_all(self:CaptureShell,
 @patch
 def execute(self:CaptureShell,
             src:str|Path, # Notebook path to read from
-            dest, # Notebook path to write to
+            dest:str|None=None, # Notebook path to write to
             exc_stop:bool=False, # Stop on exceptions?
             preproc:Callable=_false, # Called before each cell is executed
             postproc:Callable=_false, # Called after each cell is executed
@@ -130,13 +133,13 @@ def execute(self:CaptureShell,
     if inject_path is not None: inject_code = Path(inject_path).read_text()
     self.run_all(nb, exc_stop=exc_stop, preproc=preproc, postproc=postproc,
                  inject_code=inject_code, inject_idx=inject_idx)
-    write_nb(nb, dest)
+    if dest: write_nb(nb, dest)
 
 # %% ../nbs/02_shell.ipynb 47
 @call_parse
 def exec_nb(
     src:str, # Notebook path to read from
-    dest:str, # Notebook path to write to
+    dest:str='', # Notebook path to write to
     exc_stop:bool=False, # Stop on exceptions?
     inject_code:str=None, # Code to inject into a cell
     inject_path:str=None, # Path to file containing code to inject into a cell
