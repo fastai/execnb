@@ -57,7 +57,10 @@ class CaptureShell(FastInteractiveShell):
         "Disable GUI (over-ridden; called by IPython)"
         pass
     
-    def prettytb(self, fname=None):
+    def prettytb(self, 
+                 fname:str|Path=None # filename to print alongside the traceback
+                ):
+        "Show a pretty traceback for notebooks, optionally printing `fname`."
         fname = fname if fname else self._fname
         _fence = '='*75
         cell_intro_str = f"While Executing Cell #{self._cell_idx}:" if self._cell_idx else "While Executing:"
