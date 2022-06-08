@@ -46,7 +46,9 @@ class CaptureShell(FastInteractiveShell):
         InteractiveShell._instance = self
         self.exc,self.result,self.out,self.count = None,None,[],1
         self.run_cell('%matplotlib inline')
-
+        self._fname = None
+        self._cell_idx = None
+        
     def set_path(self, path):
         "Add `path` to python path"
         self.run_cell(f"import sys; sys.path.insert(0, '{str(path)}')")
@@ -54,7 +56,16 @@ class CaptureShell(FastInteractiveShell):
     def enable_gui(self, gui=None):
         "Disable GUI (over-ridden; called by IPython)"
         pass
-
+    
+    @property
+    def prettyerr(self):
+        _fence = '='*75
+        cell_intro_str = f"While Executing Cell #{self._cell_idx}:" if self._cell_idx else "While Executing:"
+        cell_str = f"\n{cell_intro_str}\n{self.exc[-1]}"
+        fname_str = f' in {self._fname}' if self._fname else ''
+        return f"{type(self.exc[1]).__name__}{fname_str}:\n{_fence}\n{cell_str}\n"
+    
+    
     def _showtraceback(self, etype, evalue, stb: str):
         self.out.append(_out_exc(etype, evalue, stb))
         self.exc = (etype, evalue, '\n'.join(stb))
@@ -81,6 +92,7 @@ def run(self:CaptureShell,
         stdout=True, # Capture stdout and save as output?
         stderr=True): # Capture stderr and save as output?
     "runs `code`, returning a list of all outputs in Jupyter notebook format"
+    self._code = code
     self.exc = False
     self.out.clear()
     self.sys_stdout,self.sys_stderr = sys.stdout,sys.stderr
@@ -96,6 +108,7 @@ def run(self:CaptureShell,
 def cell(self:CaptureShell, cell, stdout=True, stderr=True):
     "Run `cell`, skipping if not code, and store outputs back in cell"
     if cell.cell_type!='code': return
+    self._cell_idx = cell.idx_ + 1
     outs = self.run(cell.source)
     if outs:
         cell.outputs = outs
@@ -122,7 +135,7 @@ def run_all(self:CaptureShell,
             postproc(cell)
         if self.exc and exc_stop: raise self.exc[1] from None
 
-# %% ../nbs/02_shell.ipynb 38
+# %% ../nbs/02_shell.ipynb 37
 @patch
 def execute(self:CaptureShell,
             src:str|Path, # Notebook path to read from
@@ -136,13 +149,14 @@ def execute(self:CaptureShell,
 ):
     "Execute notebook from `src` and save with outputs to `dest"
     nb = read_nb(src)
+    self._fname = src
     self.set_path(Path(src).parent.resolve())
     if inject_path is not None: inject_code = Path(inject_path).read_text()
     self.run_all(nb, exc_stop=exc_stop, preproc=preproc, postproc=postproc,
                  inject_code=inject_code, inject_idx=inject_idx)
     if dest: write_nb(nb, dest)
 
-# %% ../nbs/02_shell.ipynb 49
+# %% ../nbs/02_shell.ipynb 50
 @call_parse
 def exec_nb(
     src:str, # Notebook path to read from
