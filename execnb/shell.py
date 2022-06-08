@@ -49,7 +49,7 @@ class CaptureShell(FastInteractiveShell):
 
     def set_path(self, path):
         "Add `path` to python path"
-        self.run_cell(f"import sys; sys.path.insert(0, {str(path)})")
+        self.run_cell(f"import sys; sys.path.insert(0, '{str(path)}')")
 
     def enable_gui(self, gui=None):
         "Disable GUI (over-ridden; called by IPython)"
