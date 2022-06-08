@@ -14,7 +14,7 @@ deploy: docs
 
 serve:
 	nbprocess_sidebar
-	quarto preview
+	cd nbs && quarto preview
 
 docs: .FORCE
 	nbprocess_export
