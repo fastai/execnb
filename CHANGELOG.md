@@ -2,9 +2,15 @@
 
 <!-- do not remove -->
 
+## 0.0.3
+
+- Add notebook dir to python path
+
+
 ## 0.0.2
 
 - Compat with nbprocess test runner
+
 
 ## 0.0.1
 
