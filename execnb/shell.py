@@ -57,18 +57,6 @@ class CaptureShell(FastInteractiveShell):
         "Disable GUI (over-ridden; called by IPython)"
         pass
     
-    def prettytb(self, 
-                 fname:str|Path=None # filename to print alongside the traceback
-                ):
-        "Show a pretty traceback for notebooks, optionally printing `fname`."
-        fname = fname if fname else self._fname
-        _fence = '='*75
-        cell_intro_str = f"While Executing Cell #{self._cell_idx}:" if self._cell_idx else "While Executing:"
-        cell_str = f"\n{cell_intro_str}\n{self.exc[-1]}"
-        fname_str = f' in {fname}' if fname else ''
-        return f"{type(self.exc[1]).__name__}{fname_str}:\n{_fence}\n{cell_str}\n"
-    
-    
     def _showtraceback(self, etype, evalue, stb: str):
         self.out.append(_out_exc(etype, evalue, stb))
         self.exc = (etype, evalue, '\n'.join(stb))
@@ -159,7 +147,7 @@ def execute(self:CaptureShell,
                  inject_code=inject_code, inject_idx=inject_idx)
     if dest: write_nb(nb, dest)
 
-# %% ../nbs/02_shell.ipynb 50
+# %% ../nbs/02_shell.ipynb 51
 @call_parse
 def exec_nb(
     src:str, # Notebook path to read from
