@@ -2,7 +2,8 @@
 
 # %% ../nbs/02_shell.ipynb 2
 from __future__ import annotations
-from fastcore.utils import *
+from fastcore.basics import *
+from fastcore.imports import *
 from fastcore.script import call_parse
 
 from IPython.core.interactiveshell import InteractiveShell

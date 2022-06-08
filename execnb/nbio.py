@@ -6,7 +6,8 @@ __all__ = ['NbCell', 'dict2nb', 'read_nb', 'nb2dict', 'nb2str', 'write_nb']
 # %% ../nbs/01_nbio.ipynb 3
 from fastcore.imports import *
 from fastcore.foundation import *
-from fastcore.utils import *
+from fastcore.basics import *
+from fastcore.xtras import *
 
 import ast,functools,json
 from pprint import pformat,pprint
