@@ -40,7 +40,7 @@ clean:
 	
 
 install: install_quarto
-	pip install -e .[dev]
+	pip install -e ".[dev]"
 
 install_quarto: .FORCE
 	./install_quarto.sh
