@@ -147,6 +147,19 @@ def execute(self:CaptureShell,
                  inject_code=inject_code, inject_idx=inject_idx)
     if dest: write_nb(nb, dest)
 
+# %% ../nbs/02_shell.ipynb 41
+@patch
+def prettytb(self:CaptureShell, 
+             fname:str|Path=None # filename to print alongside the traceback
+            ):
+    "Show a pretty traceback for notebooks, optionally printing `fname`."
+    fname = fname if fname else self._fname
+    _fence = '='*75
+    cell_intro_str = f"While Executing Cell #{self._cell_idx}:" if self._cell_idx else "While Executing:"
+    cell_str = f"\n{cell_intro_str}\n{self.exc[-1]}"
+    fname_str = f' in {fname}' if fname else ''
+    return f"{type(self.exc[1]).__name__}{fname_str}:\n{_fence}\n{cell_str}\n"
+
 # %% ../nbs/02_shell.ipynb 51
 @call_parse
 def exec_nb(
