@@ -57,12 +57,12 @@ class CaptureShell(FastInteractiveShell):
         "Disable GUI (over-ridden; called by IPython)"
         pass
     
-    @property
-    def prettyerr(self):
+    def prettytb(self, fname=None):
+        fname = fname if fname else self._fname
         _fence = '='*75
         cell_intro_str = f"While Executing Cell #{self._cell_idx}:" if self._cell_idx else "While Executing:"
         cell_str = f"\n{cell_intro_str}\n{self.exc[-1]}"
-        fname_str = f' in {self._fname}' if self._fname else ''
+        fname_str = f' in {fname}' if fname else ''
         return f"{type(self.exc[1]).__name__}{fname_str}:\n{_fence}\n{cell_str}\n"
     
     
