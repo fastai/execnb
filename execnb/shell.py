@@ -47,7 +47,13 @@ class CaptureShell(FastInteractiveShell):
         self.exc,self.result,self.out,self.count = None,None,[],1
         self.run_cell('%matplotlib inline')
 
-    def enable_gui(self, gui=None): pass
+    def set_path(self, path):
+        "Add `path` to python path"
+        self.run_cell(f"import sys; sys.path.insert(0, {str(path)})")
+
+    def enable_gui(self, gui=None):
+        "Disable GUI (over-ridden; called by IPython)"
+        pass
 
     def _showtraceback(self, etype, evalue, stb: str):
         self.out.append(_out_exc(etype, evalue, stb))
@@ -116,7 +122,7 @@ def run_all(self:CaptureShell,
             postproc(cell)
         if self.exc and exc_stop: raise self.exc[1] from None
 
-# %% ../nbs/02_shell.ipynb 37
+# %% ../nbs/02_shell.ipynb 38
 @patch
 def execute(self:CaptureShell,
             src:str|Path, # Notebook path to read from
@@ -130,12 +136,13 @@ def execute(self:CaptureShell,
 ):
     "Execute notebook from `src` and save with outputs to `dest"
     nb = read_nb(src)
+    self.set_path(Path(src).parent.resolve())
     if inject_path is not None: inject_code = Path(inject_path).read_text()
     self.run_all(nb, exc_stop=exc_stop, preproc=preproc, postproc=postproc,
                  inject_code=inject_code, inject_idx=inject_idx)
     if dest: write_nb(nb, dest)
 
-# %% ../nbs/02_shell.ipynb 47
+# %% ../nbs/02_shell.ipynb 49
 @call_parse
 def exec_nb(
     src:str, # Notebook path to read from
