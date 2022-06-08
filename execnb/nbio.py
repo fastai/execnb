@@ -40,9 +40,11 @@ def dict2nb(js):
 # %% ../nbs/01_nbio.ipynb 20
 def read_nb(path):
     "Return notebook at `path`"
-    return dict2nb(Path(path).read_json())
+    res = dict2nb(Path(path).read_json())
+    res['path_'] = str(path)
+    return res
 
-# %% ../nbs/01_nbio.ipynb 24
+# %% ../nbs/01_nbio.ipynb 26
 def nb2dict(d, k=None):
     "Convert parsed notebook to `dict`"
     if k in ('source',): return d.splitlines(keepends=True)
@@ -50,13 +52,13 @@ def nb2dict(d, k=None):
     if not isinstance(d, dict): return d
     return dict(**{k:nb2dict(v,k) for k,v in d.items() if k[-1] != '_'})
 
-# %% ../nbs/01_nbio.ipynb 27
+# %% ../nbs/01_nbio.ipynb 29
 def nb2str(nb):
     "Convert `nb` to a `str`"
     if isinstance(nb, (AttrDict,L)): nb = nb2dict(nb)
     return json.dumps(nb, sort_keys=True, indent=1, ensure_ascii=False) + "\n"
 
-# %% ../nbs/01_nbio.ipynb 30
+# %% ../nbs/01_nbio.ipynb 32
 def write_nb(nb, path):
     "Write `nb` to `path`"
     with maybe_open(path, 'w', encoding='utf-8') as f: f.write(nb2str(nb))
