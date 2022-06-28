@@ -24,7 +24,7 @@ class NbCell(AttrDict):
         if '_parsed_' in self: del(self['_parsed_'])
 
     def parsed_(self):
-        if self.cell_type!='code' or self.source[:1].strip() in ['%', '!']: return
+        if self.cell_type!='code' or self.source.strip()[:1] in ['%', '!']: return
         if '_parsed_' not in self: 
             try: self._parsed_ = ast.parse(self.source).body
             except SyntaxError: return # you can assign the result of ! to a variable in a notebook cell, which will result in a syntax error if parsed with the ast module.
