@@ -40,12 +40,6 @@ def _out_exc(ename, evalue, traceback): return dict(ename=str(ename), evalue=str
 def _out_stream(text): return dict(name='stdout', output_type='stream', text=text.splitlines(False))
 
 # %% ../nbs/02_shell.ipynb 7
-_CODE_MATPLOTLIB_INLINE = """
-from IPython import get_ipython
-try: get_ipython().run_line_magic('matplotlib', 'inline')
-except ModuleNotFoundError: pass
-""".strip()
-
 class CaptureShell(FastInteractiveShell):
     "Execute the IPython/Jupyter source code"
     def __init__(self,
@@ -54,7 +48,8 @@ class CaptureShell(FastInteractiveShell):
         InteractiveShell._instance = self
         self.out,self.count = [],1
         self.exc = self.result = self._fname = self._cell_idx = None
-        self.run_cell(_CODE_MATPLOTLIB_INLINE)
+        try: self.enable_matplotlib('inline')
+        except ModuleNotFoundError: pass
         if path: self.set_path(path)
         
     def set_path(self, path):
@@ -66,6 +61,12 @@ class CaptureShell(FastInteractiveShell):
     def enable_gui(self, gui=None):
         "Disable GUI (over-ridden; called by IPython)"
         pass
+    
+    def enable_matplotlib(self, gui=None):
+        "Enable `matplotlib` in a nested shell"
+        from matplotlib_inline.backend_inline import configure_inline_support
+        configure_inline_support.current_backend = 'unset'
+        return super().enable_matplotlib(gui)
     
     def _showtraceback(self, etype, evalue, stb: str):
         self.out.append(_out_exc(etype, evalue, stb))
@@ -169,7 +170,7 @@ def prettytb(self:CaptureShell,
     fname_str = f' in {fname}' if fname else ''
     return f"{type(self.exc[1]).__name__}{fname_str}:\n{_fence}\n{cell_str}\n"
 
-# %% ../nbs/02_shell.ipynb 50
+# %% ../nbs/02_shell.ipynb 52
 @call_parse
 def exec_nb(
     src:str, # Notebook path to read from
