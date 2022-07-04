@@ -5,7 +5,9 @@ from __future__ import annotations
 from fastcore.basics import *
 from fastcore.imports import *
 from fastcore.script import call_parse
+from fastcore.test import *
 
+import tokenize
 from IPython.core.interactiveshell import InteractiveShell
 from IPython.core.displayhook import DisplayHook
 from IPython.core.displaypub import DisplayPublisher
@@ -25,8 +27,17 @@ __all__ = ['CaptureShell', 'exec_nb']
 
 class _CaptureHook(DisplayHook):
     "Called when displaying a result"
+
+    def quiet(self):
+        "Should we silence because of ';'?"
+        sio = StringIO(self.shell._code)
+        tokens = list(tokenize.generate_tokens(sio.readline))
+        for t in reversed(tokens):
+            if t.type in (tokenize.ENDMARKER, tokenize.NL, tokenize.NEWLINE, tokenize.COMMENT): continue
+            return t.type == tokenize.OP and t.string == ';'
+
     def __call__(self, result=None):
-        if result is None: return
+        if result is None or self.quiet(): return
         self.fill_exec_result(result)
         self.shell._result(result)
 
@@ -105,7 +116,7 @@ def run(self:CaptureShell,
     self._stream(stdout)
     return [*self.out]
 
-# %% ../nbs/02_shell.ipynb 19
+# %% ../nbs/02_shell.ipynb 21
 @patch
 def cell(self:CaptureShell, cell, stdout=True, stderr=True):
     "Run `cell`, skipping if not code, and store outputs back in cell"
@@ -117,7 +128,7 @@ def cell(self:CaptureShell, cell, stdout=True, stderr=True):
         for o in outs:
             if 'execution_count' in o: cell['execution_count'] = o['execution_count']
 
-# %% ../nbs/02_shell.ipynb 23
+# %% ../nbs/02_shell.ipynb 25
 def _false(o): return False
 
 @patch
@@ -137,7 +148,7 @@ def run_all(self:CaptureShell,
             postproc(cell)
         if self.exc and exc_stop: raise self.exc[1] from None
 
-# %% ../nbs/02_shell.ipynb 37
+# %% ../nbs/02_shell.ipynb 39
 @patch
 def execute(self:CaptureShell,
             src:str|Path, # Notebook path to read from
@@ -158,7 +169,7 @@ def execute(self:CaptureShell,
                  inject_code=inject_code, inject_idx=inject_idx)
     if dest: write_nb(nb, dest)
 
-# %% ../nbs/02_shell.ipynb 40
+# %% ../nbs/02_shell.ipynb 42
 @patch
 def prettytb(self:CaptureShell, 
              fname:str|Path=None): # filename to print alongside the traceback
@@ -170,7 +181,7 @@ def prettytb(self:CaptureShell,
     fname_str = f' in {fname}' if fname else ''
     return f"{type(self.exc[1]).__name__}{fname_str}:\n{_fence}\n{cell_str}\n"
 
-# %% ../nbs/02_shell.ipynb 52
+# %% ../nbs/02_shell.ipynb 55
 @call_parse
 def exec_nb(
     src:str, # Notebook path to read from
