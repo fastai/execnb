@@ -10,6 +10,7 @@ import tokenize
 from IPython.core.interactiveshell import InteractiveShell
 from IPython.core.displayhook import DisplayHook
 from IPython.core.displaypub import DisplayPublisher
+from base64 import b64encode
 from io import StringIO
 
 from .fastshell import FastInteractiveShell
@@ -47,9 +48,18 @@ class _CapturePub(DisplayPublisher):
 # %% ../nbs/02_shell.ipynb 6
 # These are the standard notebook formats for exception and stream data (e.g stdout)
 def _out_exc(ename, evalue, traceback): return dict(ename=str(ename), evalue=str(evalue), output_type='error', traceback=traceback)
-def _out_stream(text): return dict(name='stdout', output_type='stream', text=text.splitlines(False))
+def _out_stream(text): return dict(name='stdout', output_type='stream', text=text.splitlines(True))
 
-# %% ../nbs/02_shell.ipynb 8
+# %% ../nbs/02_shell.ipynb 7
+def _format_mimedata(k, v):
+    "Format mime-type keyed data consistently with Jupyter"
+    if k.startswith('text/'): return v.splitlines(True)
+    if k.startswith('image/') and isinstance(v, bytes):
+        v = b64encode(v).decode()
+        return v+'\n' if not v.endswith('\n') else v
+    return v
+
+# %% ../nbs/02_shell.ipynb 9
 class CaptureShell(FastInteractiveShell):
     "Execute the IPython/Jupyter source code"
     def __init__(self,
@@ -82,11 +92,12 @@ class CaptureShell(FastInteractiveShell):
         self.out.append(_out_exc(etype, evalue, stb))
         self.exc = (etype, evalue, '\n'.join(stb))
 
-    def _add_out(self, data, meta, typ='execute_result', **kwargs): self.out.append(dict(data=data, metadata=meta, output_type=typ, **kwargs))
+    def _add_out(self, data, meta, typ='execute_result', **kwargs):
+        fd = {k:_format_mimedata(k,v) for k,v in data.items()}
+        self.out.append(dict(data=fd, metadata=meta, output_type=typ, **kwargs))
 
     def _add_exec(self, result, meta, typ='execute_result'):
-        fd = {k:v.splitlines(True) for k,v in result.items()}
-        self._add_out(fd, meta, execution_count=self.count)
+        self._add_out(result, meta, execution_count=self.count)
         self.count += 1
 
     def _result(self, result):
@@ -97,7 +108,7 @@ class CaptureShell(FastInteractiveShell):
         text = std.getvalue()
         if text: self.out.append(_out_stream(text))
 
-# %% ../nbs/02_shell.ipynb 11
+# %% ../nbs/02_shell.ipynb 12
 @patch
 def run(self:CaptureShell,
         code:str, # Python/IPython code to run
@@ -115,7 +126,7 @@ def run(self:CaptureShell,
     self._stream(stdout)
     return [*self.out]
 
-# %% ../nbs/02_shell.ipynb 22
+# %% ../nbs/02_shell.ipynb 23
 @patch
 def cell(self:CaptureShell, cell, stdout=True, stderr=True):
     "Run `cell`, skipping if not code, and store outputs back in cell"
@@ -127,7 +138,7 @@ def cell(self:CaptureShell, cell, stdout=True, stderr=True):
         for o in outs:
             if 'execution_count' in o: cell['execution_count'] = o['execution_count']
 
-# %% ../nbs/02_shell.ipynb 26
+# %% ../nbs/02_shell.ipynb 27
 def _false(o): return False
 
 @patch
@@ -147,7 +158,7 @@ def run_all(self:CaptureShell,
             postproc(cell)
         if self.exc and exc_stop: raise self.exc[1] from None
 
-# %% ../nbs/02_shell.ipynb 40
+# %% ../nbs/02_shell.ipynb 41
 @patch
 def execute(self:CaptureShell,
             src:str|Path, # Notebook path to read from
@@ -168,7 +179,7 @@ def execute(self:CaptureShell,
                  inject_code=inject_code, inject_idx=inject_idx)
     if dest: write_nb(nb, dest)
 
-# %% ../nbs/02_shell.ipynb 43
+# %% ../nbs/02_shell.ipynb 44
 @patch
 def prettytb(self:CaptureShell, 
              fname:str|Path=None): # filename to print alongside the traceback
@@ -180,7 +191,7 @@ def prettytb(self:CaptureShell,
     fname_str = f' in {fname}' if fname else ''
     return f"{type(self.exc[1]).__name__}{fname_str}:\n{_fence}\n{cell_str}\n"
 
-# %% ../nbs/02_shell.ipynb 56
+# %% ../nbs/02_shell.ipynb 60
 @call_parse
 def exec_nb(
     src:str, # Notebook path to read from
