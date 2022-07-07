@@ -48,7 +48,7 @@ class _CapturePub(DisplayPublisher):
 # %% ../nbs/02_shell.ipynb 6
 # These are the standard notebook formats for exception and stream data (e.g stdout)
 def _out_exc(ename, evalue, traceback): return dict(ename=str(ename), evalue=str(evalue), output_type='error', traceback=traceback)
-def _out_stream(text): return dict(name='stdout', output_type='stream', text=text.splitlines(True))
+def _out_stream(text, name): return dict(name=name, output_type='stream', text=text.splitlines(True))
 
 # %% ../nbs/02_shell.ipynb 7
 def _format_mimedata(k, v):
@@ -63,11 +63,11 @@ def _format_mimedata(k, v):
 class CaptureShell(FastInteractiveShell):
     "Execute the IPython/Jupyter source code"
     def __init__(self,
-                path:str|Path=None): # Add `path` to python path
+                 path:str|Path=None): # Add `path` to python path
         super().__init__(displayhook_class=_CaptureHook, display_pub_class=_CapturePub)
         InteractiveShell._instance = self
         self.out,self.count = [],1
-        self.exc = self.result = self._fname = self._cell_idx = None
+        self.exc = self.result = self._fname = self._cell_idx = self._stdout = self._stderr = None
         try: self.enable_matplotlib('inline')
         except ModuleNotFoundError: pass
         if path: self.set_path(path)
@@ -93,6 +93,7 @@ class CaptureShell(FastInteractiveShell):
         self.exc = (etype, evalue, '\n'.join(stb))
 
     def _add_out(self, data, meta, typ='execute_result', **kwargs):
+        self._stream()
         fd = {k:_format_mimedata(k,v) for k,v in data.items()}
         self.out.append(dict(data=fd, metadata=meta, output_type=typ, **kwargs))
 
@@ -104,9 +105,15 @@ class CaptureShell(FastInteractiveShell):
         self.result = result
         self._add_exec(*self.display_formatter.format(result))
 
-    def _stream(self, std):
-        text = std.getvalue()
-        if text: self.out.append(_out_stream(text))
+    def _stream(self):
+        for nm in ('stdout','stderr'):
+            attr = '_'+nm
+            std = getattr(self, attr)
+            if std is not None:
+                text = std.getvalue()
+                if text:
+                    self.out.append(_out_stream(text, nm))
+                    setattr(self, attr, StringIO())
 
 # %% ../nbs/02_shell.ipynb 12
 @patch
@@ -118,12 +125,12 @@ def run(self:CaptureShell,
     self._code = code
     self.exc = False
     self.out.clear()
-    self.sys_stdout,self.sys_stderr = sys.stdout,sys.stderr
-    if stdout: stdout = sys.stdout = StringIO()
-    if stderr: stderr = sys.stderr = StringIO()
+    sys_stdout,sys_stderr = sys.stdout,sys.stderr
+    if stdout: self._stdout = sys.stdout = StringIO()
+    if stderr: self._stderr = sys.stderr = StringIO()
     try: self.run_cell(code)
-    finally: sys.stdout,sys.stderr = self.sys_stdout,self.sys_stderr
-    self._stream(stdout)
+    finally: sys.stdout,sys.stderr = sys_stdout,sys_stderr
+    self._stream()
     return [*self.out]
 
 # %% ../nbs/02_shell.ipynb 23
@@ -191,7 +198,7 @@ def prettytb(self:CaptureShell,
     fname_str = f' in {fname}' if fname else ''
     return f"{type(self.exc[1]).__name__}{fname_str}:\n{_fence}\n{cell_str}\n"
 
-# %% ../nbs/02_shell.ipynb 60
+# %% ../nbs/02_shell.ipynb 64
 @call_parse
 def exec_nb(
     src:str, # Notebook path to read from
