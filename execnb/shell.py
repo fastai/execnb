@@ -121,7 +121,7 @@ def run(self:CaptureShell,
         code:str, # Python/IPython code to run
         stdout=True, # Capture stdout and save as output?
         stderr=True): # Capture stderr and save as output?
-    "runs `code`, returning a list of all outputs in Jupyter notebook format"
+    "Run `code`, returning a list of all outputs in Jupyter notebook format"
     self._code = code
     self.exc = False
     self.out.clear()
@@ -208,6 +208,6 @@ def exec_nb(
     inject_path:str=None, # Path to file containing code to inject into a cell
     inject_idx:int=0 # Cell to replace with `inject_code`
 ):
-    "Execute notebook from `src` and save with outputs to `dest"
+    "Execute notebook from `src` and save with outputs to `dest`"
     CaptureShell().execute(src, dest, exc_stop=exc_stop, inject_code=inject_code,
                            inject_path=inject_path, inject_idx=inject_idx)

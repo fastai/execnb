@@ -27,9 +27,6 @@ website:
   navbar:
     background: primary
     search: true
-    left:
-      - text: Home
-        file: index.ipynb
     right:
       - icon: github
         href: https://github.com/fastai/execnb/tree/master/
@@ -39,4 +36,3 @@ website:
 metadata-files: 
   - sidebar.yml
   - custom.yml
-
