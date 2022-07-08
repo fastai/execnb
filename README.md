@@ -22,8 +22,15 @@ mamba installed.)
 
 ## How to use
 
-Use `CaptureShell` to run Jupyter code and capture notebook outputs,
-without running a Jupyter server (or even having it installed):
+Use [CaptureShell](https://fastai.github.io/execnb/shell#CaptureShell)
+to run Jupyter code and capture notebook outputs, without running a
+Jupyter server (or even having it installed):
+
+``` python
+from execnb.nbio import *
+from execnb.shell import *
+from fastcore.utils import *
+```
 
 ``` python
 s = CaptureShell()
@@ -35,7 +42,8 @@ s.run('1+1')
       'output_type': 'execute_result',
       'execution_count': 1}]
 
-To execute a notebook and save it with outputs filled in, use `execute`:
+To execute a notebook and save it with outputs filled in, use
+[CaptureShell.execute](https://fastai.github.io/execnb/shell#CaptureShell.execute):
 
 ``` python
 try:
@@ -44,4 +52,28 @@ try:
 finally: Path('tmp.ipynb').unlink()
 ```
 
-    [{'data': {'text/plain': ['2']}, 'execution_count': 6, 'metadata': {}, 'output_type': 'execute_result'}, {'name': 'stdout', 'output_type': 'stream', 'text': ['1']}]
+    [{'name': 'stdout', 'output_type': 'stream', 'text': ['1\n']}, {'data': {'text/plain': ['2']}, 'execution_count': 3, 'metadata': {}, 'output_type': 'execute_result'}]
+
+You can also execute notebooks from the command line with
+[exec_nb](https://fastai.github.io/execnb/shell#exec_nb):
+
+``` python
+!exec_nb --help
+```
+
+    usage: exec_nb [-h] [--dest DEST] [--exc_stop] [--inject_code INJECT_CODE]
+                   [--inject_path INJECT_PATH] [--inject_idx INJECT_IDX]
+                   src
+
+    Execute notebook from `src` and save with outputs to `dest`
+
+    positional arguments:
+      src                        Notebook path to read from
+
+    optional arguments:
+      -h, --help                 show this help message and exit
+      --dest DEST                Notebook path to write to (default: )
+      --exc_stop                 Stop on exceptions? (default: False)
+      --inject_code INJECT_CODE  Code to inject into a cell
+      --inject_path INJECT_PATH  Path to file containing code to inject into a cell
+      --inject_idx INJECT_IDX    Cell to replace with `inject_code` (default: 0)
