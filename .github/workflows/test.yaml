@@ -45,7 +45,7 @@ jobs:
         with:
           repository: 'fastai/nbprocess'
           path: nbdev
-      - name: Install nbdev
+      - name: Run nbdev tests
         run: |
           cd nbdev && pip install -Ue ".[dev]"
           nbprocess_test
