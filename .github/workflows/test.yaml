@@ -45,6 +45,10 @@ jobs:
         with:
           repository: 'fastai/nbprocess'
           path: nbprocess
+      - name: Set git info for tests
+        run: |
+          git config --global user.email "${GH_EMAIL}"
+          git config --global user.name "${GH_USERNAME}"
       - name: Run nbdev tests
         run: |
           cd nbprocess && pip install -Ue ".[dev]"
