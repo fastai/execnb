@@ -9,7 +9,7 @@ from fastcore.foundation import *
 from fastcore.basics import *
 from fastcore.xtras import *
 
-import ast,functools,json
+import ast,functools
 from pprint import pformat,pprint
 
 # %% ../nbs/01_nbio.ipynb 12
@@ -59,7 +59,7 @@ def nb2dict(d, k=None):
 def nb2str(nb):
     "Convert `nb` to a `str`"
     if isinstance(nb, (AttrDict,L)): nb = nb2dict(nb)
-    return json.dumps(nb, sort_keys=True, indent=1, ensure_ascii=False) + "\n"
+    return dumps(nb, sort_keys=True, indent=1, ensure_ascii=False) + "\n"
 
 # %% ../nbs/01_nbio.ipynb 31
 def write_nb(nb, path):
