@@ -2,6 +2,11 @@
 
 <!-- do not remove -->
 
+## 0.0.8
+
+- Use nbdev2
+
+
 ## 0.0.6
 
 ### Bugs Squashed
