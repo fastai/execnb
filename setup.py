@@ -48,9 +48,7 @@ setuptools.setup(
     long_description_content_type = 'text/markdown',
     zip_safe = False,
     entry_points = {
-        'console_scripts': cfg.get('console_scripts','').split(),
-        'mkdocs.plugins': [ 'rm_num_prefix = nbprocess.mkdocs:RmNumPrefix' ],
-        'nbdev': [f'{cfg.get("lib_path")}={cfg.get("lib_path")}._modidx:d']
+        'console_scripts': cfg.get('console_scripts','').split()
     },
     **setup_cfg)
 

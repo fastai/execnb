@@ -16,7 +16,7 @@
 
 ## 0.0.2
 
-- Compat with nbprocess test runner
+- Compat with nbdev test runner
 
 
 ## 0.0.1

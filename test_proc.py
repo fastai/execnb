@@ -1,5 +1,5 @@
-from nbprocess.read import read_nb
-from nbprocess.sync import *
+from nbdev.read import read_nb
+from nbdev.sync import *
 from execnb import *
 
 nb = read_nb('tests/clean.ipynb')
