@@ -43,7 +43,7 @@ def dict2nb(js):
 # %% ../nbs/01_nbio.ipynb 19
 def read_nb(path):
     "Return notebook at `path`"
-    res = dict2nb(Path(path).read_json())
+    res = dict2nb(Path(path).read_json(encoding='utf-8'))
     res['path_'] = str(path)
     return res
 
