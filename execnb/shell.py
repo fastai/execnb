@@ -2,9 +2,15 @@
 
 # %% ../nbs/02_shell.ipynb 2
 from __future__ import annotations
+
 from fastcore.basics import *
 from fastcore.imports import *
 from fastcore.script import call_parse
+
+import multiprocessing
+try:
+    if sys.platform == 'darwin': multiprocessing.set_start_method("fork")
+except RuntimeError: pass # if re-running cell
 
 import tokenize
 from IPython.core.interactiveshell import InteractiveShell
@@ -186,7 +192,7 @@ def execute(self:CaptureShell,
                  inject_code=inject_code, inject_idx=inject_idx)
     if dest: write_nb(nb, dest)
 
-# %% ../nbs/02_shell.ipynb 44
+# %% ../nbs/02_shell.ipynb 45
 @patch
 def prettytb(self:CaptureShell, 
              fname:str|Path=None): # filename to print alongside the traceback
@@ -198,7 +204,7 @@ def prettytb(self:CaptureShell,
     fname_str = f' in {fname}' if fname else ''
     return f"{type(self.exc[1]).__name__}{fname_str}:\n{_fence}\n{cell_str}\n"
 
-# %% ../nbs/02_shell.ipynb 64
+# %% ../nbs/02_shell.ipynb 65
 @call_parse
 def exec_nb(
     src:str, # Notebook path to read from
