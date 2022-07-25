@@ -2,6 +2,13 @@
 
 <!-- do not remove -->
 
+## 0.0.9
+
+### New Features
+
+- use fork mode on mac ([#22](https://github.com/fastai/execnb/issues/22))
+
+
 ## 0.0.8
 
 - Use nbdev2
