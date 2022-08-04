@@ -2,6 +2,16 @@
 
 <!-- do not remove -->
 
+## 0.0.10
+
+### New Features
+
+- add `mk_cell` ([#25](https://github.com/fastai/execnb/issues/25))
+- Add new nb function ([#23](https://github.com/fastai/execnb/pull/23)), thanks to [@dleen](https://github.com/dleen)
+- Parameterize Notebooks ([#19](https://github.com/fastai/execnb/issues/19))
+  - (This was completed earlier but not marked done in gh issues)
+
+
 ## 0.0.9
 
 ### New Features
