@@ -2,6 +2,13 @@
 
 <!-- do not remove -->
 
+## 0.1.0
+
+### New Features
+
+- Remove usage of fastcore.xtras and fastcore.foundation to reduce chance of macOS fork issue ([#26](https://github.com/fastai/execnb/issues/26))
+
+
 ## 0.0.10
 
 ### New Features
