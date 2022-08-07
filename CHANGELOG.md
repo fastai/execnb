@@ -2,6 +2,17 @@
 
 <!-- do not remove -->
 
+## 0.1.1
+
+### New Features
+
+- Support `ipywidgets` ([#24](https://github.com/fastai/execnb/issues/24))
+
+### Bugs Squashed
+
+- Seaborn is not compatible with execnb ([#27](https://github.com/fastai/execnb/issues/27))
+
+
 ## 0.1.0
 
 ### New Features
