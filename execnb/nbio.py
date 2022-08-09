@@ -75,7 +75,7 @@ def mk_cell(text,  # `source` attr in cell
 # %% ../nbs/01_nbio.ipynb 31
 def nb2dict(d, k=None):
     "Convert parsed notebook to `dict`"
-    if k=='source': return d.splitlines(keepends=True)
+    if k=='source': return d.splitlines(keepends=True) if isinstance(d, str) else d
     if isinstance(d, list): return list(map(nb2dict,d))
     if not isinstance(d, dict): return d
     return dict(**{k:nb2dict(v,k) for k,v in d.items() if k[-1] != '_'})
