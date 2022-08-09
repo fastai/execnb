@@ -75,13 +75,7 @@ def mk_cell(text,  # `source` attr in cell
 # %% ../nbs/01_nbio.ipynb 31
 class BaseNB:
     "Base Class for Notebooks."
-    def __init__(self,
-                 nb # an AttrDict or Path to a notebook
-                ):
-        if isinstance(nb, BaseNB): self.nb = nb.nb
-        elif isinstance(nb, (str, Path)): self.nb = read_nb(nb)
-        else: self.nb=nb
-        
+    def __init__(self, nb): self.nb=nb
     def __getattr__(self, k): return getattr(self.nb, k)
     def __getitem__(self, k): return getattr(self, k)
 
