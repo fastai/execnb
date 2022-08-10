@@ -12,9 +12,11 @@ format:
     theme: cosmo
     css: styles.css
     toc: true
+    toc-depth: 4
 
 website:
   title: "execnb"
+  site-url: "https://fastai.github.io/execnb/"
   description: "A description of your project"
   execute: 
     enabled: false
@@ -22,14 +24,14 @@ website:
   open-graph: true
   reader-mode: true
   repo-branch: master
-  repo-url: https://github.com/fastai/execnb/tree/master/
+  repo-url: "https://github.com/fastai/execnb/tree/master/"
   repo-actions: [issue]
   navbar:
     background: primary
     search: true
     right:
       - icon: github
-        href: https://github.com/fastai/execnb/tree/master/
+        href: "https://github.com/fastai/execnb/tree/master/"
   sidebar:
     style: "floating"
 
