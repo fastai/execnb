@@ -22,7 +22,8 @@ mamba installed.)
 
 ## How to use
 
-Use [CaptureShell](https://fastai.github.io/execnb/shell#CaptureShell)
+Use
+[`CaptureShell`](https://fastai.github.io/execnb/shell.html#captureshell)
 to run Jupyter code and capture notebook outputs, without running a
 Jupyter server (or even having it installed):
 
@@ -43,7 +44,7 @@ s.run('1+1')
       'execution_count': 1}]
 
 To execute a notebook and save it with outputs filled in, use
-[CaptureShell.execute](https://fastai.github.io/execnb/shell#CaptureShell.execute):
+[`CaptureShell.execute`](https://fastai.github.io/execnb/shell.html#captureshell.execute):
 
 ``` python
 try:
@@ -55,7 +56,7 @@ finally: Path('tmp.ipynb').unlink()
     [{'name': 'stdout', 'output_type': 'stream', 'text': ['1\n']}, {'data': {'text/plain': ['2']}, 'execution_count': 3, 'metadata': {}, 'output_type': 'execute_result'}]
 
 You can also execute notebooks from the command line with
-[exec_nb](https://fastai.github.io/execnb/shell#exec_nb):
+[`exec_nb`](https://fastai.github.io/execnb/shell.html#exec_nb):
 
 ``` python
 !exec_nb --help
