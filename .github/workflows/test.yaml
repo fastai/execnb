@@ -9,6 +9,15 @@ jobs:
         with:
           version: ${{ matrix.version }}
           pre: 1
+  nbdev-integration-test:
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+      - run: pip install -Ue ".[dev]"
       - name: clone nbdev
         uses: actions/checkout@v3
         with:
