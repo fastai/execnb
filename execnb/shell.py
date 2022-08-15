@@ -6,8 +6,8 @@ from __future__ import annotations
 import os
 os.environ['MPLBACKEND'] = 'module://matplotlib_inline.backend_inline'
 
-from fastcore.basics import *
 from fastcore.imports import *
+from fastcore.basics import *
 from fastcore.script import call_parse
 
 import multiprocessing
@@ -33,7 +33,6 @@ __all__ = ['CaptureShell', 'exec_nb']
 # %% ../nbs/02_shell.ipynb 5
 # IPython requires a DisplayHook and DisplayPublisher
 # We override `__call__` and `publish` to save outputs instead of printing them
-
 class _CaptureHook(DisplayHook):
     "Called when displaying a result"
 
@@ -77,8 +76,17 @@ class CaptureShell(FastInteractiveShell):
         InteractiveShell._instance = self
         self.out,self.count = [],1
         self.exc = self.result = self._fname = self._cell_idx = self._stdout = self._stderr = None
+        if IN_NOTEBOOK:
+            try: self.enable_matplotlib()
+            except ModuleNotFoundError: pass
         if path: self.set_path(path)
-        
+
+    def enable_matplotlib(self):
+        "Enable `matplotlib` in a nested shell"
+        from matplotlib_inline.backend_inline import configure_inline_support
+        configure_inline_support.current_backend = 'unset'
+        return super().enable_matplotlib('inline')
+    
     def set_path(self, path):
         "Add `path` to python path, or `path.parent` if it's a file"
         path = Path(path)
@@ -134,7 +142,7 @@ def run(self:CaptureShell,
     self._stream()
     return [*self.out]
 
-# %% ../nbs/02_shell.ipynb 26
+# %% ../nbs/02_shell.ipynb 25
 @patch
 def cell(self:CaptureShell, cell, stdout=True, stderr=True):
     "Run `cell`, skipping if not code, and store outputs back in cell"
@@ -146,7 +154,7 @@ def cell(self:CaptureShell, cell, stdout=True, stderr=True):
         for o in outs:
             if 'execution_count' in o: cell['execution_count'] = o['execution_count']
 
-# %% ../nbs/02_shell.ipynb 30
+# %% ../nbs/02_shell.ipynb 29
 def _false(o): return False
 
 @patch
@@ -166,7 +174,7 @@ def run_all(self:CaptureShell,
             postproc(cell)
         if self.exc and exc_stop: raise self.exc[1] from None
 
-# %% ../nbs/02_shell.ipynb 44
+# %% ../nbs/02_shell.ipynb 43
 @patch
 def execute(self:CaptureShell,
             src:str|Path, # Notebook path to read from
@@ -187,7 +195,7 @@ def execute(self:CaptureShell,
                  inject_code=inject_code, inject_idx=inject_idx)
     if dest: write_nb(nb, dest)
 
-# %% ../nbs/02_shell.ipynb 48
+# %% ../nbs/02_shell.ipynb 47
 @patch
 def prettytb(self:CaptureShell, 
              fname:str|Path=None): # filename to print alongside the traceback
@@ -199,7 +207,7 @@ def prettytb(self:CaptureShell,
     fname_str = f' in {fname}' if fname else ''
     return f"{type(self.exc[1]).__name__}{fname_str}:\n{_fence}\n{cell_str}\n"
 
-# %% ../nbs/02_shell.ipynb 67
+# %% ../nbs/02_shell.ipynb 66
 @call_parse
 def exec_nb(
     src:str, # Notebook path to read from
