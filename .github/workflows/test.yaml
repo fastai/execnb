@@ -7,7 +7,6 @@ jobs:
     steps:
       - uses: fastai/workflows/nbdev-ci@master
         with:
-          version: ${{ matrix.version }}
           pre: 1
 #       - name: clone nbdev
 #         uses: actions/checkout@v3
