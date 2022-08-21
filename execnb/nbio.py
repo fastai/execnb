@@ -89,4 +89,8 @@ def nb2str(nb):
 # %% ../nbs/01_nbio.ipynb 37
 def write_nb(nb, path):
     "Write `nb` to `path`"
-    with open(path, 'w', encoding='utf-8') as f: f.write(nb2str(nb))
+    new = nb2str(nb)
+    path = Path(path)
+    old = Path(path).read_text() if path.exists() else None
+    if new!=old:
+        with open(path, 'w', encoding='utf-8') as f: f.write(new)
