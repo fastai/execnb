@@ -2,6 +2,14 @@
 
 <!-- do not remove -->
 
+## 0.1.2
+
+### New Features
+
+- Only write file if changed in `write_nb` ([#35](https://github.com/fastai/execnb/issues/35))
+- faster startup with `MPLBACKEND` environment variable to lazily set matplotlib backend ([#33](https://github.com/fastai/execnb/pull/33)), thanks to [@seeM](https://github.com/seeM)
+
+
 ## 0.1.1
 
 ### New Features
