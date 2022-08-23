@@ -18,8 +18,6 @@ website:
   title: "execnb"
   site-url: "https://fastai.github.io/execnb/"
   description: "A description of your project"
-  execute: 
-    enabled: false
   twitter-card: true
   open-graph: true
   reader-mode: true
