@@ -30,7 +30,7 @@ from collections.abc import Callable
 # %% auto 0
 __all__ = ['CaptureShell', 'exec_nb']
 
-# %% ../nbs/02_shell.ipynb 5
+# %% ../nbs/02_shell.ipynb 4
 # IPython requires a DisplayHook and DisplayPublisher
 # We override `__call__` and `publish` to save outputs instead of printing them
 class _CaptureHook(DisplayHook):
@@ -53,12 +53,12 @@ class _CapturePub(DisplayPublisher):
     "Called when adding an output"
     def publish(self, data, metadata=None, **kwargs): self.shell._add_out(data, metadata, typ='display_data')
 
-# %% ../nbs/02_shell.ipynb 6
+# %% ../nbs/02_shell.ipynb 5
 # These are the standard notebook formats for exception and stream data (e.g stdout)
 def _out_exc(ename, evalue, traceback): return dict(ename=str(ename), evalue=str(evalue), output_type='error', traceback=traceback)
 def _out_stream(text, name): return dict(name=name, output_type='stream', text=text.splitlines(True))
 
-# %% ../nbs/02_shell.ipynb 7
+# %% ../nbs/02_shell.ipynb 6
 def _format_mimedata(k, v):
     "Format mime-type keyed data consistently with Jupyter"
     if k.startswith('text/'): return v.splitlines(True)
@@ -67,7 +67,7 @@ def _format_mimedata(k, v):
         return v+'\n' if not v.endswith('\n') else v
     return v
 
-# %% ../nbs/02_shell.ipynb 9
+# %% ../nbs/02_shell.ipynb 8
 class CaptureShell(FastInteractiveShell):
     "Execute the IPython/Jupyter source code"
     def __init__(self,
@@ -91,7 +91,7 @@ class CaptureShell(FastInteractiveShell):
         "Add `path` to python path, or `path.parent` if it's a file"
         path = Path(path)
         if path.is_file(): path = path.parent
-        self.run_cell(f"import sys; sys.path.insert(0, '{path}')")
+        self.run_cell(f"import sys; sys.path.insert(0, '{path.as_posix()}')")
 
     def enable_gui(self, gui=None):
         "Disable GUI (over-ridden; called by IPython)"
@@ -124,7 +124,7 @@ class CaptureShell(FastInteractiveShell):
                     self.out.append(_out_stream(text, nm))
                     setattr(self, attr, StringIO())
 
-# %% ../nbs/02_shell.ipynb 12
+# %% ../nbs/02_shell.ipynb 11
 @patch
 def run(self:CaptureShell,
         code:str, # Python/IPython code to run
@@ -142,7 +142,7 @@ def run(self:CaptureShell,
     self._stream()
     return [*self.out]
 
-# %% ../nbs/02_shell.ipynb 25
+# %% ../nbs/02_shell.ipynb 24
 @patch
 def cell(self:CaptureShell, cell, stdout=True, stderr=True):
     "Run `cell`, skipping if not code, and store outputs back in cell"
@@ -154,7 +154,7 @@ def cell(self:CaptureShell, cell, stdout=True, stderr=True):
         for o in outs:
             if 'execution_count' in o: cell['execution_count'] = o['execution_count']
 
-# %% ../nbs/02_shell.ipynb 29
+# %% ../nbs/02_shell.ipynb 28
 def _false(o): return False
 
 @patch
@@ -174,7 +174,7 @@ def run_all(self:CaptureShell,
             postproc(cell)
         if self.exc and exc_stop: raise self.exc[1] from None
 
-# %% ../nbs/02_shell.ipynb 43
+# %% ../nbs/02_shell.ipynb 42
 @patch
 def execute(self:CaptureShell,
             src:str|Path, # Notebook path to read from
@@ -195,7 +195,7 @@ def execute(self:CaptureShell,
                  inject_code=inject_code, inject_idx=inject_idx)
     if dest: write_nb(nb, dest)
 
-# %% ../nbs/02_shell.ipynb 47
+# %% ../nbs/02_shell.ipynb 46
 @patch
 def prettytb(self:CaptureShell, 
              fname:str|Path=None): # filename to print alongside the traceback
@@ -207,7 +207,7 @@ def prettytb(self:CaptureShell,
     fname_str = f' in {fname}' if fname else ''
     return f"{type(self.exc[1]).__name__}{fname_str}:\n{_fence}\n{cell_str}\n"
 
-# %% ../nbs/02_shell.ipynb 66
+# %% ../nbs/02_shell.ipynb 65
 @call_parse
 def exec_nb(
     src:str, # Notebook path to read from
