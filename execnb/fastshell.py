@@ -4,6 +4,7 @@
 
 import os, sys, warnings
 from IPython.core.interactiveshell import InteractiveShell, InteractiveShellABC
+from IPython.core.history import HistoryAccessorBase
 from IPython.core.autocall import ZMQExitAutocall
 from IPython.core.magic import magics_class, line_magic, Magics
 from IPython.utils.process import system
@@ -30,11 +31,20 @@ class KernelMagics(Magics):
     @line_magic
     def autosave(self, arg_s): pass
 
+def noop(*args, **kwargs): return args
+
+class DummyHistory(HistoryAccessorBase):
+    def __init__(self, *args, **kw): self.enabled=False
+    def __getattr__(self, k): return noop
+    _log_validate = False
+
 class FastInteractiveShell(InteractiveShell):
     data_pub_class = Any()
-    #kernel = Any()
     parent_header = Any()
     exiter = Instance(ZMQExitAutocall)
+
+    def init_history(self): self.history_manager=DummyHistory()
+    def atexit_operations(self, *args, **kwargs): pass
 
     @default('exiter')
     def _default_exiter(self): return ZMQExitAutocall(self)
