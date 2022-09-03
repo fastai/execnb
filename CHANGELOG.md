@@ -6,6 +6,17 @@
 
 ### New Features
 
+- Add `DummyHistory` ([#38](https://github.com/fastai/execnb/issues/38))
+
+### Bugs Squashed
+
+- nbdev_test fails due to unescaped backslash in windows path ([#37](https://github.com/fastai/execnb/issues/37))
+
+
+## 0.1.2
+
+### New Features
+
 - Only write file if changed in `write_nb` ([#35](https://github.com/fastai/execnb/issues/35))
 - faster startup with `MPLBACKEND` environment variable to lazily set matplotlib backend ([#33](https://github.com/fastai/execnb/pull/33)), thanks to [@seeM](https://github.com/seeM)
 
