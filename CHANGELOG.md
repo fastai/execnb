@@ -2,6 +2,13 @@
 
 <!-- do not remove -->
 
+## 0.1.4
+
+
+### Bugs Squashed
+
+- `CaptureShell.shell` sets `cell.outputs` to ordinary dicts instead of `AttrDict`s ([#39](https://github.com/fastai/execnb/pull/39)), thanks to [@seeM](https://github.com/seeM)
+
 
 ## 0.1.3
 
@@ -11,7 +18,7 @@
 
 ### Bugs Squashed
 
-- nbdev_test fails due to unescaped backslash in windows path ([#37](https://github.com/fastai/execnb/issues/37))
+- `nbdev_test` fails due to unescaped backslash in windows path ([#37](https://github.com/fastai/execnb/issues/37))
 
 
 ## 0.1.2
