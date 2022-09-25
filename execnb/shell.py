@@ -24,6 +24,7 @@ from io import StringIO
 
 from .fastshell import FastInteractiveShell
 from .nbio import *
+from .nbio import _dict2obj
 
 from collections.abc import Callable
 
@@ -150,7 +151,7 @@ def cell(self:CaptureShell, cell, stdout=True, stderr=True):
     self._cell_idx = cell.idx_ + 1
     outs = self.run(cell.source)
     if outs:
-        cell.outputs = outs
+        cell.outputs = _dict2obj(outs)
         for o in outs:
             if 'execution_count' in o: cell['execution_count'] = o['execution_count']
 
