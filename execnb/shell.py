@@ -78,15 +78,15 @@ class CaptureShell(FastInteractiveShell):
         self.out,self.count = [],1
         self.exc = self.result = self._fname = self._cell_idx = self._stdout = self._stderr = None
         if IN_NOTEBOOK:
-            try: self.enable_matplotlib()
+            try: self.enable_matplotlib('inline')
             except ModuleNotFoundError: pass
         if path: self.set_path(path)
 
-    def enable_matplotlib(self):
+    def enable_matplotlib(self, gui=None):
         "Enable `matplotlib` in a nested shell"
         from matplotlib_inline.backend_inline import configure_inline_support
         configure_inline_support.current_backend = 'unset'
-        return super().enable_matplotlib('inline')
+        return super().enable_matplotlib(gui)
     
     def set_path(self, path):
         "Add `path` to python path, or `path.parent` if it's a file"
