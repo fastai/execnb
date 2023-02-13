@@ -2,6 +2,18 @@
 
 <!-- do not remove -->
 
+## 0.1.5
+
+### New Features
+
+- Add `DummyHistory` ([#38](https://github.com/fastai/execnb/issues/38))
+
+### Bugs Squashed
+
+- `CaptureShell.enable_matplotlib` does not follow its parent's interface ([#42](https://github.com/fastai/execnb/issues/42))
+- Specify encoding when reading file in `write_nb` ([#41](https://github.com/fastai/execnb/pull/41)), thanks to [@RalfG](https://github.com/RalfG)
+
+
 ## 0.1.4
 
 
