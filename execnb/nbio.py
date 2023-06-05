@@ -28,7 +28,7 @@ class NbCell(AttrDict):
 
     def parsed_(self):
         if self.cell_type!='code' or self.source.strip()[:1] in ['%', '!']: return
-        if '_parsed_' not in self: 
+        if '_parsed_' not in self:
             try: self._parsed_ = ast.parse(self.source).body
             # you can assign the result of ! to a variable in a notebook cell
             # which will result in a syntax error if parsed with the ast module.
@@ -70,6 +70,9 @@ def mk_cell(text,  # `source` attr in cell
     "Create an `NbCell` containing `text`"
     assert cell_type in {'code', 'markdown', 'raw'}
     if 'metadata' not in kwargs: kwargs['metadata']={}
+    if cell_type == 'code':
+        kwargs['outputs']=[]
+        kwargs['execution_count']=0
     return NbCell(0, dict(cell_type=cell_type, source=text, directives_={}, **kwargs))
 
 # %% ../nbs/01_nbio.ipynb 31
