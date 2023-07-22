@@ -3,7 +3,7 @@
 d = { 'settings': { 'branch': 'master',
                 'doc_baseurl': '/execnb/',
                 'doc_host': 'https://fastai.github.io',
-                'git_url': 'https://github.com/fastai/execnb/tree/master/',
+                'git_url': 'https://github.com/fastai/execnb/',
                 'lib_path': 'execnb'},
   'syms': { 'execnb.fastshell': {},
             'execnb.nbio': { 'execnb.nbio.NbCell': ('nbio.html#nbcell', 'execnb/nbio.py'),
