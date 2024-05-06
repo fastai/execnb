@@ -29,7 +29,7 @@ from .nbio import _dict2obj
 from collections.abc import Callable
 
 # %% auto 0
-__all__ = ['CaptureShell', 'exec_nb']
+__all__ = ['CaptureShell', 'find_output', 'out_exec', 'out_stream', 'out_error', 'exec_nb']
 
 # %% ../nbs/02_shell.ipynb 4
 # IPython requires a DisplayHook and DisplayPublisher
@@ -155,7 +155,32 @@ def cell(self:CaptureShell, cell, stdout=True, stderr=True):
         for o in outs:
             if 'execution_count' in o: cell['execution_count'] = o['execution_count']
 
-# %% ../nbs/02_shell.ipynb 28
+# %% ../nbs/02_shell.ipynb 27
+def find_output(outp, # Output from `run`
+                ot='execute_result' # Output_type to find
+               ):
+    "Find first output of type `ot` in `CaptureShell.run` output"
+    return first(o for o in outp if o['output_type']==ot)
+
+# %% ../nbs/02_shell.ipynb 30
+def out_exec(outp):
+    "Get data from execution result in `outp`."
+    out = find_output(outp)
+    if out: return '\n'.join(first(out['data'].values()))
+
+# %% ../nbs/02_shell.ipynb 32
+def out_stream(outp):
+    "Get text from stream in `outp`."
+    out = find_output(outp, 'stream')
+    if out: return ('\n'.join(out['text'])).strip()
+
+# %% ../nbs/02_shell.ipynb 34
+def out_error(outp):
+    "Get traceback from error in `outp`."
+    out = find_output(outp, 'error')
+    if out: return '\n'.join(out['traceback'])
+
+# %% ../nbs/02_shell.ipynb 37
 def _false(o): return False
 
 @patch
@@ -175,7 +200,7 @@ def run_all(self:CaptureShell,
             postproc(cell)
         if self.exc and exc_stop: raise self.exc[1] from None
 
-# %% ../nbs/02_shell.ipynb 42
+# %% ../nbs/02_shell.ipynb 51
 @patch
 def execute(self:CaptureShell,
             src:str|Path, # Notebook path to read from
@@ -196,7 +221,7 @@ def execute(self:CaptureShell,
                  inject_code=inject_code, inject_idx=inject_idx)
     if dest: write_nb(nb, dest)
 
-# %% ../nbs/02_shell.ipynb 46
+# %% ../nbs/02_shell.ipynb 55
 @patch
 def prettytb(self:CaptureShell, 
              fname:str|Path=None): # filename to print alongside the traceback
@@ -208,7 +233,7 @@ def prettytb(self:CaptureShell,
     fname_str = f' in {fname}' if fname else ''
     return f"{type(self.exc[1]).__name__}{fname_str}:\n{_fence}\n{cell_str}\n"
 
-# %% ../nbs/02_shell.ipynb 65
+# %% ../nbs/02_shell.ipynb 74
 @call_parse
 def exec_nb(
     src:str, # Notebook path to read from
