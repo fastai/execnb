@@ -2,6 +2,11 @@
 
 <!-- do not remove -->
 
+## 0.1.6
+
+- New functions for extracting outputs
+
+
 ## 0.1.5
 
 ### New Features
