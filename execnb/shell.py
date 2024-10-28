@@ -8,7 +8,7 @@ from __future__ import annotations
 from fastcore.utils import *
 from fastcore.script import call_parse
 
-import multiprocessing
+import multiprocessing,types
 try:
     if sys.platform == 'darwin': multiprocessing.set_start_method("fork")
 except RuntimeError: pass # if re-running cell
@@ -16,6 +16,10 @@ except RuntimeError: pass # if re-running cell
 from IPython.core.interactiveshell import InteractiveShell, ExecutionInfo, ExecutionResult
 from IPython.core.displayhook import DisplayHook
 from IPython.utils.capture import capture_output
+from IPython.core.completer import IPCompleter,provisionalcompleter
+from IPython.core.hooks import CommandChainDispatcher
+from IPython.core.completerlib import module_completer
+from IPython.utils.strdispatch import StrDispatch
 from IPython.display import display as disp, HTML
 
 import traceback
@@ -27,9 +31,9 @@ from .nbio import *
 from .nbio import _dict2obj
 
 # %% auto 0
-__all__ = ['CaptureShell', 'find_output', 'out_exec', 'out_stream', 'out_error', 'exec_nb']
+__all__ = ['CaptureShell', 'find_output', 'out_exec', 'out_stream', 'out_error', 'exec_nb', 'SmartCompleter']
 
-# %% ../nbs/02_shell.ipynb 5
+# %% ../nbs/02_shell.ipynb 7
 class _CustDisplayHook(DisplayHook):
     def write_output_prompt(self): pass
     def write_format_data(self, data, md_dict): pass
@@ -41,7 +45,7 @@ def __repr__(self: ExecutionInfo): return f'cell: {self.raw_cell}; id: {self.cel
 @patch
 def __repr__(self: ExecutionResult): return f'result: {self.result}; err: {self.error_in_exec}; info: <{self.info}>'
 
-# %% ../nbs/02_shell.ipynb 6
+# %% ../nbs/02_shell.ipynb 8
 class CaptureShell(InteractiveShell):
     displayhook_class = _CustDisplayHook
 
@@ -69,7 +73,7 @@ class CaptureShell(InteractiveShell):
         if path.is_file(): path = path.parent
         self.run_cell(f"import sys; sys.path.insert(0, '{path.as_posix()}')")
 
-# %% ../nbs/02_shell.ipynb 22
+# %% ../nbs/02_shell.ipynb 24
 def _out_stream(text, name): return dict(name=name, output_type='stream', text=text.splitlines(True))
 def _out_exc(e):
     ename = type(e).__name__
@@ -99,7 +103,7 @@ def _out_nb(o, fmt):
         res.append(_mk_out(*fmt.format(r), 'execute_result'))
     return res
 
-# %% ../nbs/02_shell.ipynb 23
+# %% ../nbs/02_shell.ipynb 25
 @patch
 def run(self:CaptureShell,
         code:str, # Python/IPython code to run
@@ -111,7 +115,7 @@ def run(self:CaptureShell,
     self.exc = res.exception
     return _out_nb(res, self.display_formatter)
 
-# %% ../nbs/02_shell.ipynb 37
+# %% ../nbs/02_shell.ipynb 39
 @patch
 def cell(self:CaptureShell, cell, stdout=True, stderr=True):
     "Run `cell`, skipping if not code, and store outputs back in cell"
@@ -123,32 +127,32 @@ def cell(self:CaptureShell, cell, stdout=True, stderr=True):
         for o in outs:
             if 'execution_count' in o: cell['execution_count'] = o['execution_count']
 
-# %% ../nbs/02_shell.ipynb 40
+# %% ../nbs/02_shell.ipynb 42
 def find_output(outp, # Output from `run`
                 ot='execute_result' # Output_type to find
                ):
     "Find first output of type `ot` in `CaptureShell.run` output"
     return first(o for o in outp if o['output_type']==ot)
 
-# %% ../nbs/02_shell.ipynb 43
+# %% ../nbs/02_shell.ipynb 45
 def out_exec(outp):
     "Get data from execution result in `outp`."
     out = find_output(outp)
     if out: return '\n'.join(first(out['data'].values()))
 
-# %% ../nbs/02_shell.ipynb 45
+# %% ../nbs/02_shell.ipynb 47
 def out_stream(outp):
     "Get text from stream in `outp`."
     out = find_output(outp, 'stream')
     if out: return ('\n'.join(out['text'])).strip()
 
-# %% ../nbs/02_shell.ipynb 47
+# %% ../nbs/02_shell.ipynb 49
 def out_error(outp):
     "Get traceback from error in `outp`."
     out = find_output(outp, 'error')
     if out: return '\n'.join(out['traceback'])
 
-# %% ../nbs/02_shell.ipynb 49
+# %% ../nbs/02_shell.ipynb 51
 def _false(o): return False
 
 @patch
@@ -168,7 +172,7 @@ def run_all(self:CaptureShell,
             postproc(cell)
         if self.exc and exc_stop: raise self.exc from None
 
-# %% ../nbs/02_shell.ipynb 63
+# %% ../nbs/02_shell.ipynb 65
 @patch
 def execute(self:CaptureShell,
             src:str|Path, # Notebook path to read from
@@ -189,7 +193,7 @@ def execute(self:CaptureShell,
                  inject_code=inject_code, inject_idx=inject_idx)
     if dest: write_nb(nb, dest)
 
-# %% ../nbs/02_shell.ipynb 67
+# %% ../nbs/02_shell.ipynb 69
 @patch
 def prettytb(self:CaptureShell, 
              fname:str|Path=None): # filename to print alongside the traceback
@@ -201,7 +205,7 @@ def prettytb(self:CaptureShell,
     fname_str = f' in {fname}' if fname else ''
     return f"{type(self.exc).__name__}{fname_str}:\n{_fence}\n{cell_str}\n"
 
-# %% ../nbs/02_shell.ipynb 86
+# %% ../nbs/02_shell.ipynb 88
 @call_parse
 def exec_nb(
     src:str, # Notebook path to read from
@@ -214,3 +218,24 @@ def exec_nb(
     "Execute notebook from `src` and save with outputs to `dest`"
     CaptureShell().execute(src, dest, exc_stop=exc_stop, inject_code=inject_code,
                            inject_path=inject_path, inject_idx=inject_idx)
+
+# %% ../nbs/02_shell.ipynb 91
+class SmartCompleter(IPCompleter):
+    def __init__(self, shell, namespace=None):
+        if namespace is None: namespace = shell.user_ns
+        super().__init__(shell, namespace)
+        self.use_jedi = False
+
+        sdisp = StrDispatch()
+        self.custom_completers = sdisp
+        import_disp = CommandChainDispatcher()
+        import_disp.add(types.MethodType(module_completer, shell))
+        sdisp.add_s('import', import_disp)
+        sdisp.add_s('from', import_disp)
+
+    def __call__(self, c):
+        if not c: return []
+        with provisionalcompleter():
+            return [o.text.rpartition('.')[-1]
+                    for o in self.completions(c, len(c))
+                    if o.type=='<unknown>']
