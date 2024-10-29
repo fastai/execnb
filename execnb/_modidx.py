@@ -48,6 +48,7 @@ d = { 'settings': { 'branch': 'master',
                               'execnb.shell._out_stream': ('shell.html#_out_stream', 'execnb/shell.py'),
                               'execnb.shell.exec_nb': ('shell.html#exec_nb', 'execnb/shell.py'),
                               'execnb.shell.find_output': ('shell.html#find_output', 'execnb/shell.py'),
+                              'execnb.shell.format_exc': ('shell.html#format_exc', 'execnb/shell.py'),
                               'execnb.shell.out_error': ('shell.html#out_error', 'execnb/shell.py'),
                               'execnb.shell.out_exec': ('shell.html#out_exec', 'execnb/shell.py'),
                               'execnb.shell.out_stream': ('shell.html#out_stream', 'execnb/shell.py')}}}

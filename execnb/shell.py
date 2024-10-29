@@ -31,9 +31,9 @@ from .nbio import *
 from .nbio import _dict2obj
 
 # %% auto 0
-__all__ = ['CaptureShell', 'find_output', 'out_exec', 'out_stream', 'out_error', 'exec_nb', 'SmartCompleter']
+__all__ = ['CaptureShell', 'format_exc', 'find_output', 'out_exec', 'out_stream', 'out_error', 'exec_nb', 'SmartCompleter']
 
-# %% ../nbs/02_shell.ipynb 7
+# %% ../nbs/02_shell.ipynb 5
 class _CustDisplayHook(DisplayHook):
     def write_output_prompt(self): pass
     def write_format_data(self, data, md_dict): pass
@@ -45,18 +45,17 @@ def __repr__(self: ExecutionInfo): return f'cell: {self.raw_cell}; id: {self.cel
 @patch
 def __repr__(self: ExecutionResult): return f'result: {self.result}; err: {self.error_in_exec}; info: <{self.info}>'
 
-# %% ../nbs/02_shell.ipynb 8
+# %% ../nbs/02_shell.ipynb 6
 class CaptureShell(InteractiveShell):
     displayhook_class = _CustDisplayHook
 
-    def __init__(self,
-                 path:str|Path=None): # Add `path` to python path
-        "Execute the IPython/Jupyter source code"
+    def __init__(self, path:str|Path=None):
         super().__init__()
         self.result,self.exc = None,None
         if path: self.set_path(path)
-        self.display_formatter.active = False
-        self.run_cell('%matplotlib inline')  # Enable inline plotting
+        self.display_formatter.active = True
+        if not IN_NOTEBOOK: InteractiveShell._instance = self
+        self.run_cell('%matplotlib inline')
 
     def run_cell(self, raw_cell, store_history=False, silent=False, shell_futures=True, cell_id=None,
                  stdout=True, stderr=True, display=True):
@@ -73,12 +72,17 @@ class CaptureShell(InteractiveShell):
         if path.is_file(): path = path.parent
         self.run_cell(f"import sys; sys.path.insert(0, '{path.as_posix()}')")
 
-# %% ../nbs/02_shell.ipynb 24
+# %% ../nbs/02_shell.ipynb 22
+def format_exc(e):
+    "Format exception `e` as a string"
+    return ''.join(traceback.format_exception(type(e), e, e.__traceback__))
+
+# %% ../nbs/02_shell.ipynb 23
 def _out_stream(text, name): return dict(name=name, output_type='stream', text=text.splitlines(True))
 def _out_exc(e):
     ename = type(e).__name__
     tb = traceback.extract_tb(e.__traceback__)#.format()
-    return dict(ename=str(ename), evalue=str(e), output_type='error', traceback=tb)
+    return dict(ename=str(ename), evalue=str(e), output_type='error', traceback=format_exc(e))
 
 def _format_mimedata(k, v):
     "Format mime-type keyed data consistently with Jupyter"
@@ -103,7 +107,7 @@ def _out_nb(o, fmt):
         res.append(_mk_out(*fmt.format(r), 'execute_result'))
     return res
 
-# %% ../nbs/02_shell.ipynb 25
+# %% ../nbs/02_shell.ipynb 24
 @patch
 def run(self:CaptureShell,
         code:str, # Python/IPython code to run
@@ -115,7 +119,7 @@ def run(self:CaptureShell,
     self.exc = res.exception
     return _out_nb(res, self.display_formatter)
 
-# %% ../nbs/02_shell.ipynb 39
+# %% ../nbs/02_shell.ipynb 38
 @patch
 def cell(self:CaptureShell, cell, stdout=True, stderr=True):
     "Run `cell`, skipping if not code, and store outputs back in cell"
@@ -127,32 +131,32 @@ def cell(self:CaptureShell, cell, stdout=True, stderr=True):
         for o in outs:
             if 'execution_count' in o: cell['execution_count'] = o['execution_count']
 
-# %% ../nbs/02_shell.ipynb 42
+# %% ../nbs/02_shell.ipynb 41
 def find_output(outp, # Output from `run`
                 ot='execute_result' # Output_type to find
                ):
     "Find first output of type `ot` in `CaptureShell.run` output"
     return first(o for o in outp if o['output_type']==ot)
 
-# %% ../nbs/02_shell.ipynb 45
+# %% ../nbs/02_shell.ipynb 44
 def out_exec(outp):
     "Get data from execution result in `outp`."
     out = find_output(outp)
     if out: return '\n'.join(first(out['data'].values()))
 
-# %% ../nbs/02_shell.ipynb 47
+# %% ../nbs/02_shell.ipynb 46
 def out_stream(outp):
     "Get text from stream in `outp`."
     out = find_output(outp, 'stream')
     if out: return ('\n'.join(out['text'])).strip()
 
-# %% ../nbs/02_shell.ipynb 49
+# %% ../nbs/02_shell.ipynb 48
 def out_error(outp):
     "Get traceback from error in `outp`."
     out = find_output(outp, 'error')
     if out: return '\n'.join(out['traceback'])
 
-# %% ../nbs/02_shell.ipynb 51
+# %% ../nbs/02_shell.ipynb 50
 def _false(o): return False
 
 @patch
@@ -172,7 +176,7 @@ def run_all(self:CaptureShell,
             postproc(cell)
         if self.exc and exc_stop: raise self.exc from None
 
-# %% ../nbs/02_shell.ipynb 65
+# %% ../nbs/02_shell.ipynb 64
 @patch
 def execute(self:CaptureShell,
             src:str|Path, # Notebook path to read from
@@ -193,7 +197,7 @@ def execute(self:CaptureShell,
                  inject_code=inject_code, inject_idx=inject_idx)
     if dest: write_nb(nb, dest)
 
-# %% ../nbs/02_shell.ipynb 69
+# %% ../nbs/02_shell.ipynb 68
 @patch
 def prettytb(self:CaptureShell, 
              fname:str|Path=None): # filename to print alongside the traceback
@@ -201,11 +205,11 @@ def prettytb(self:CaptureShell,
     fname = fname if fname else self._fname
     _fence = '='*75
     cell_intro_str = f"While Executing Cell #{self._cell_idx}:" if self._cell_idx else "While Executing:"
-    cell_str = f"\n{cell_intro_str}\n{self.exc}"
+    cell_str = f"\n{cell_intro_str}\n{format_exc(self.exc)}"
     fname_str = f' in {fname}' if fname else ''
     return f"{type(self.exc).__name__}{fname_str}:\n{_fence}\n{cell_str}\n"
 
-# %% ../nbs/02_shell.ipynb 88
+# %% ../nbs/02_shell.ipynb 87
 @call_parse
 def exec_nb(
     src:str, # Notebook path to read from
@@ -219,13 +223,12 @@ def exec_nb(
     CaptureShell().execute(src, dest, exc_stop=exc_stop, inject_code=inject_code,
                            inject_path=inject_path, inject_idx=inject_idx)
 
-# %% ../nbs/02_shell.ipynb 91
+# %% ../nbs/02_shell.ipynb 90
 class SmartCompleter(IPCompleter):
-    def __init__(self, shell, namespace=None):
+    def __init__(self, shell, namespace=None, jedi=False):
         if namespace is None: namespace = shell.user_ns
         super().__init__(shell, namespace)
-        self.use_jedi = False
-
+        self.use_jedi = jedi
         sdisp = StrDispatch()
         self.custom_completers = sdisp
         import_disp = CommandChainDispatcher()
