@@ -7,6 +7,7 @@ from __future__ import annotations
 
 from fastcore.utils import *
 from fastcore.script import call_parse
+from fastcore.ansi import ansi2html
 
 import multiprocessing,types,traceback
 try:
@@ -125,11 +126,11 @@ def run(self:CaptureShell,
     return _out_nb(res, self.display_formatter)
 
 # %% ../nbs/02_shell.ipynb 30
-def render_outputs(outputs):
+def render_outputs(outputs, ansi_renderer=strip_ansi):
     def render_output(out):
         otype = out['output_type']
         if otype == 'stream':
-            txt = strip_ansi(''.join(out['text']))
+            txt = ansi_renderer(''.join(out['text']))
             return f"<pre>{txt}</pre>" if out['name']=='stdout' else f"<pre class='stderr'>{txt}</pre>"
         elif otype in ('display_data','execute_result'):
             data = out['data']
@@ -146,7 +147,7 @@ def render_outputs(outputs):
     
     return '\n'.join(map(render_output, outputs))
 
-# %% ../nbs/02_shell.ipynb 41
+# %% ../nbs/02_shell.ipynb 43
 @patch
 def cell(self:CaptureShell, cell, stdout=True, stderr=True):
     "Run `cell`, skipping if not code, and store outputs back in cell"
@@ -158,32 +159,32 @@ def cell(self:CaptureShell, cell, stdout=True, stderr=True):
         for o in outs:
             if 'execution_count' in o: cell['execution_count'] = o['execution_count']
 
-# %% ../nbs/02_shell.ipynb 44
+# %% ../nbs/02_shell.ipynb 46
 def find_output(outp, # Output from `run`
                 ot='execute_result' # Output_type to find
                ):
     "Find first output of type `ot` in `CaptureShell.run` output"
     return first(o for o in outp if o['output_type']==ot)
 
-# %% ../nbs/02_shell.ipynb 47
+# %% ../nbs/02_shell.ipynb 49
 def out_exec(outp):
     "Get data from execution result in `outp`."
     out = find_output(outp)
     if out: return '\n'.join(first(out['data'].values()))
 
-# %% ../nbs/02_shell.ipynb 49
+# %% ../nbs/02_shell.ipynb 51
 def out_stream(outp):
     "Get text from stream in `outp`."
     out = find_output(outp, 'stream')
     if out: return ('\n'.join(out['text'])).strip()
 
-# %% ../nbs/02_shell.ipynb 51
+# %% ../nbs/02_shell.ipynb 53
 def out_error(outp):
     "Get traceback from error in `outp`."
     out = find_output(outp, 'error')
     if out: return '\n'.join(out['traceback'])
 
-# %% ../nbs/02_shell.ipynb 53
+# %% ../nbs/02_shell.ipynb 55
 def _false(o): return False
 
 @patch
@@ -203,7 +204,7 @@ def run_all(self:CaptureShell,
             postproc(cell)
         if self.exc and exc_stop: raise self.exc from None
 
-# %% ../nbs/02_shell.ipynb 67
+# %% ../nbs/02_shell.ipynb 69
 @patch
 def execute(self:CaptureShell,
             src:str|Path, # Notebook path to read from
@@ -224,7 +225,7 @@ def execute(self:CaptureShell,
                  inject_code=inject_code, inject_idx=inject_idx)
     if dest: write_nb(nb, dest)
 
-# %% ../nbs/02_shell.ipynb 71
+# %% ../nbs/02_shell.ipynb 73
 @patch
 def prettytb(self:CaptureShell, 
              fname:str|Path=None): # filename to print alongside the traceback
@@ -236,7 +237,7 @@ def prettytb(self:CaptureShell,
     fname_str = f' in {fname}' if fname else ''
     return f"{type(self.exc).__name__}{fname_str}:\n{_fence}\n{cell_str}\n"
 
-# %% ../nbs/02_shell.ipynb 90
+# %% ../nbs/02_shell.ipynb 92
 @call_parse
 def exec_nb(
     src:str, # Notebook path to read from
@@ -250,7 +251,7 @@ def exec_nb(
     CaptureShell().execute(src, dest, exc_stop=exc_stop, inject_code=inject_code,
                            inject_path=inject_path, inject_idx=inject_idx)
 
-# %% ../nbs/02_shell.ipynb 93
+# %% ../nbs/02_shell.ipynb 95
 class SmartCompleter(IPCompleter):
     def __init__(self, shell, namespace=None, jedi=False):
         if namespace is None: namespace = shell.user_ns
@@ -268,9 +269,9 @@ class SmartCompleter(IPCompleter):
         with provisionalcompleter():
             return [o.text.rpartition('.')[-1]
                     for o in self.completions(c, len(c))
-                    if o.type=='<unknown>']
+                    if o.type not in ('magic', 'path')]
 
-# %% ../nbs/02_shell.ipynb 95
+# %% ../nbs/02_shell.ipynb 97
 @patch
 def complete(self:CaptureShell, c):
     if not hasattr(self, '_completer'): self._completer = SmartCompleter(self)
