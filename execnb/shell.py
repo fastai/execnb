@@ -269,7 +269,7 @@ class SmartCompleter(IPCompleter):
         with provisionalcompleter():
             return [o.text.rpartition('.')[-1]
                     for o in self.completions(c, len(c))
-                    if o.type=='<unknown>']
+                    if o.type not in ('magic', 'path')]
 
 # %% ../nbs/02_shell.ipynb 97
 @patch
