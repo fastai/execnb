@@ -9,7 +9,7 @@ from fastcore.utils import *
 from fastcore.script import call_parse
 from fastcore.ansi import ansi2html
 
-import multiprocessing,types,traceback
+import mistletoe,multiprocessing,types,traceback
 try:
     if sys.platform == 'darwin': multiprocessing.set_start_method("fork")
 except RuntimeError: pass # if re-running cell
@@ -28,6 +28,7 @@ from base64 import b64encode
 from html import escape
 try: from matplotlib_inline.backend_inline import set_matplotlib_formats
 except ImportError: set_matplotlib_formats = None
+
 
 from .nbio import *
 from .nbio import _dict2obj
@@ -137,7 +138,7 @@ def render_outputs(outputs, ansi_renderer=strip_ansi):
             _g = lambda t: ''.join(data[t]) if t in data else None
             if d := _g('text/html'): return d
             if d := _g('application/javascript'): return f'<script>{d}</script>'
-            if d := _g('text/markdown'): return markdown.markdown(d)
+            if d := _g('text/markdown'): return mistletoe.markdown(d)
             if d := _g('image/svg+xml'): return d
             if d := _g('image/jpeg'): return f'<img src="data:image/jpeg;base64,{d}"/>'
             if d := _g('image/png'): return f'<img src="data:image/png;base64,{d}"/>'
