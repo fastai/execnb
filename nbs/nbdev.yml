@@ -6,4 +6,4 @@ website:
   site-url: "https://fastai.github.io/execnb/"
   description: "A description of your project"
   repo-branch: master
-  repo-url: "https://github.com/fastai/execnb/tree/master/"
+  repo-url: "https://github.com/fastai/execnb/"
