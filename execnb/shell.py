@@ -9,7 +9,7 @@ from fastcore.utils import *
 from fastcore.script import call_parse
 from fastcore.ansi import ansi2html
 
-import mistletoe,multiprocessing,types,traceback,signal
+import multiprocessing,types,traceback,signal
 try:
     if sys.platform == 'darwin': multiprocessing.set_start_method("fork")
 except RuntimeError: pass # if re-running cell
@@ -138,6 +138,8 @@ def run(self:CaptureShell,
 
 # %% ../nbs/02_shell.ipynb
 def render_outputs(outputs, ansi_renderer=strip_ansi):
+    try: import mistletoe
+    except ImportError: return print('mistletoe not found -- please install it')
     def render_output(out):
         otype = out['output_type']
         if otype == 'stream':
