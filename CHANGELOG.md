@@ -4,6 +4,21 @@
 
 ## 0.1.6
 
+### New Features
+
+- Add support for timeouts in CaptureShell ([#60](https://github.com/fastai/execnb/issues/60))
+- Add `render_outputs` ([#55](https://github.com/fastai/execnb/issues/55))
+- Add SmartCompleter ([#54](https://github.com/fastai/execnb/issues/54))
+- Major refactor of CaptureShell ([#53](https://github.com/fastai/execnb/issues/53))
+- add markdown to doc output ([#52](https://github.com/fastai/execnb/issues/52))
+
+### Bugs Squashed
+
+- Use `callable` instead of `Callable` ([#59](https://github.com/fastai/execnb/issues/59))
+
+
+## 0.1.6
+
 - New functions for extracting outputs
 
 
