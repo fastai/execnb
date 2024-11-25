@@ -138,8 +138,9 @@ def run(self:CaptureShell,
 
 # %% ../nbs/02_shell.ipynb
 def _pre(s, xtra=''): return f"<pre {xtra}><code>{escape(s)}</code></pre>"
+def _strip(s): return strip_ansi(escape(s))
 
-def render_outputs(outputs, ansi_renderer=strip_ansi, include_imgs=True, pygments=False):
+def render_outputs(outputs, ansi_renderer=_strip, include_imgs=True, pygments=False):
     try:
         from mistletoe import markdown, HTMLRenderer
         from mistletoe.contrib.pygments_renderer import PygmentsRenderer
@@ -149,7 +150,8 @@ def render_outputs(outputs, ansi_renderer=strip_ansi, include_imgs=True, pygment
         otype = out['output_type']
         if otype == 'stream':
             txt = ansi_renderer(''.join(out['text']))
-            return _pre(txt, '' if out['name']=='stdout' else "class='stderr'")
+            xtra = '' if out['name']=='stdout' else "class='stderr'"
+            return f"<pre {xtra}><code>{txt}</code></pre>"
         elif otype in ('display_data','execute_result'):
             data = out['data']
             _g = lambda t: ''.join(data[t]) if t in data else None
