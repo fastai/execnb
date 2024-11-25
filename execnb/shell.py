@@ -137,22 +137,27 @@ def run(self:CaptureShell,
     return _out_nb(res, self.display_formatter)
 
 # %% ../nbs/02_shell.ipynb
-def render_outputs(outputs, ansi_renderer=strip_ansi, include_imgs=True):
-    try: import mistletoe
+def _pre(s, xtra=''): return f"<pre {xtra}><code>{escape(s)}</code></pre>"
+
+def render_outputs(outputs, ansi_renderer=strip_ansi, include_imgs=True, pygments=False):
+    try:
+        from mistletoe import markdown, HTMLRenderer
+        from mistletoe.contrib.pygments_renderer import PygmentsRenderer
     except ImportError: return print('mistletoe not found -- please install it')
+    renderer = PygmentsRenderer if pygments else HTMLRenderer
     def render_output(out):
         otype = out['output_type']
         if otype == 'stream':
             txt = ansi_renderer(''.join(out['text']))
-            return f"<pre>{txt}</pre>" if out['name']=='stdout' else f"<pre class='stderr'>{txt}</pre>"
+            return _pre(txt, '' if out['name']=='stdout' else "class='stderr'")
         elif otype in ('display_data','execute_result'):
             data = out['data']
             _g = lambda t: ''.join(data[t]) if t in data else None
             if d := _g('text/html'): return d
             if d := _g('application/javascript'): return f'<script>{d}</script>'
-            if d := _g('text/markdown'): return mistletoe.markdown(d)
+            if d := _g('text/markdown'): return markdown(d, renderer=renderer)
             if d := _g('text/latex'): return f'<div class="math">${d}$</div>'
-            if d := _g('text/plain'): return f"<pre>{escape(d)}</pre>"
+            if d := _g('text/plain'): return _pre(d)
             if d := _g('image/svg+xml'): return d
             if include_imgs:
                 if d := _g('image/jpeg'): return f'<img src="data:image/jpeg;base64,{d}"/>'
