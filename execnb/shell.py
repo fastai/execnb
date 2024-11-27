@@ -63,21 +63,15 @@ class CaptureShell(InteractiveShell):
         if not IN_NOTEBOOK: InteractiveShell._instance = self
         if set_matplotlib_formats:
             self.enable_matplotlib("inline")
-            self.run_cell("from matplotlib_inline.backend_inline import set_matplotlib_formats")
-            self.run_cell(f"set_matplotlib_formats('{mpl_format}')")
+            self._run("from matplotlib_inline.backend_inline import set_matplotlib_formats")
+            self._run(f"set_matplotlib_formats('{mpl_format}')")
 
-    def run_cell(self, raw_cell, store_history=False, silent=False, shell_futures=True, cell_id=None,
-                 stdout=True, stderr=True, display=True, timeout:Optional[int]=None):
-        if not timeout: timeout = self.timeout
+    def _run(self, raw_cell, store_history=False, silent=False, shell_futures=True, cell_id=None,
+                 stdout=True, stderr=True, display=True):
         # TODO what if there's a comment?
         semic = raw_cell.rstrip().endswith(';')
-        if timeout:
-            def handler(*args): raise TimeoutError()
-            signal.signal(signal.SIGALRM, handler)
-            signal.alarm(timeout)
         with capture_output(display=display, stdout=stdout, stderr=stderr) as c:
             result = super().run_cell(raw_cell, store_history, silent, shell_futures=shell_futures, cell_id=cell_id)
-        if timeout: signal.alarm(0)
         return AttrDict(result=result, stdout='' if semic else c.stdout, stderr=c.stderr,
                         display_objects=c.outputs, exception=result.error_in_exec, quiet=semic)
     
@@ -85,9 +79,23 @@ class CaptureShell(InteractiveShell):
         "Add `path` to python path, or `path.parent` if it's a file"
         path = Path(path)
         if path.is_file(): path = path.parent
-        self.run_cell(f"import sys; sys.path.insert(0, '{path.as_posix()}')")
+        self._run(f"import sys; sys.path.insert(0, '{path.as_posix()}')")
     
     def enable_gui(self, gui=None): pass
+
+# %% ../nbs/02_shell.ipynb
+@patch
+def run_cell(self:CaptureShell, raw_cell, store_history=False, silent=False, shell_futures=True, cell_id=None,
+             stdout=True, stderr=True, display=True, timeout=None):
+    if not timeout: timeout = self.timeout
+    if timeout:
+        def handler(*args): raise TimeoutError()
+        signal.signal(signal.SIGALRM, handler)
+        signal.alarm(timeout)
+    try: return self._run(raw_cell, store_history, silent, shell_futures, cell_id=cell_id,
+                          stdout=stdout, stderr=stderr, display=display)
+    finally:
+        if timeout: signal.alarm(0)
 
 # %% ../nbs/02_shell.ipynb
 def format_exc(e):
