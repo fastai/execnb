@@ -53,7 +53,7 @@ def __repr__(self: ExecutionResult): return f'result: {self.result}; err: {self.
 class CaptureShell(InteractiveShell):
     displayhook_class = _CustDisplayHook
 
-    def __init__(self, path:str|Path=None, mpl_format='retina', history=False, timeout=None):
+    def __init__(self, path:str|Path=None, mpl_format='retina', history=False, timeout:Optional[int]=None):
         super().__init__()
         self.history_manager.enabled = history
         self.timeout = timeout
@@ -67,7 +67,7 @@ class CaptureShell(InteractiveShell):
             self.run_cell(f"set_matplotlib_formats('{mpl_format}')")
 
     def run_cell(self, raw_cell, store_history=False, silent=False, shell_futures=True, cell_id=None,
-                 stdout=True, stderr=True, display=True, timeout=None):
+                 stdout=True, stderr=True, display=True, timeout:Optional[int]=None):
         if not timeout: timeout = self.timeout
         # TODO what if there's a comment?
         semic = raw_cell.rstrip().endswith(';')
@@ -129,12 +129,22 @@ def _out_nb(o, fmt):
 def run(self:CaptureShell,
         code:str, # Python/IPython code to run
         stdout=True, # Capture stdout and save as output?
-        stderr=True): # Capture stderr and save as output?
+        stderr=True, # Capture stderr and save as output?
+       timeout:Optional[int]=None): # Shell command will time out after {timeout} seconds
     "Run `code`, returning a list of all outputs in Jupyter notebook format"
-    res = self.run_cell(code, stdout=stdout, stderr=stderr)
+    res = self.run_cell(code, stdout=stdout, stderr=stderr, timeout=timeout)
     self.result = res.result.result
     self.exc = res.exception
     return _out_nb(res, self.display_formatter)
+
+# %% ../nbs/02_shell.ipynb
+@patch
+async def run_async(self:CaptureShell,
+        code: str,  # Python/IPython code to run
+        stdout=True,  # Capture stdout and save as output?
+        stderr=True,  # Capture stderr and save as output?
+        timeout:Optional[int]=None): # Shell command will time out after {timeout} seconds
+    return self.run(code, stdout=stdout, stderr=stderr, timeout=timeout)
 
 # %% ../nbs/02_shell.ipynb
 def _pre(s, xtra=''): return f"<pre {xtra}><code>{escape(s)}</code></pre>"
