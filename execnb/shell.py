@@ -159,11 +159,12 @@ def render_outputs(outputs, ansi_renderer=_strip, include_imgs=True, pygments=Fa
             if d := _g('application/javascript'): return f'<script>{d}</script>'
             if d := _g('text/markdown'): return markdown(d, renderer=renderer)
             if d := _g('text/latex'): return f'<div class="math">${d}$</div>'
-            if d := _g('text/plain'): return _pre(d)
-            if d := _g('image/svg+xml'): return d
             if include_imgs:
                 if d := _g('image/jpeg'): return f'<img src="data:image/jpeg;base64,{d}"/>'
                 if d := _g('image/png'): return f'<img src="data:image/png;base64,{d}"/>'
+            if d := _g('text/plain'): return _pre(d)
+            if d := _g('image/svg+xml'): return d
+            
         return ''
     
     return '\n'.join(map(render_output, outputs))
