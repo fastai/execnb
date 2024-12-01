@@ -2,6 +2,21 @@
 
 <!-- do not remove -->
 
+## 0.1.9
+
+### New Features
+
+- add `shell.run_async` ([#63](https://github.com/AnswerDotAI/execnb/pull/63)), thanks to [@comhar](https://github.com/comhar)
+- Use pygments for md output rendering ([#62](https://github.com/AnswerDotAI/execnb/issues/62))
+- Add optional image rendering control to `render_outputs` ([#61](https://github.com/AnswerDotAI/execnb/pull/61)), thanks to [@ncoop57](https://github.com/ncoop57)
+- Add option to use ansi2html renderer ([#57](https://github.com/AnswerDotAI/execnb/pull/57)), thanks to [@Isaac-Flath](https://github.com/Isaac-Flath)
+
+### Bugs Squashed
+
+- Missing execution count in run cells ([#65](https://github.com/AnswerDotAI/execnb/issues/65))
+- Fix matplotlib rendering in `render_outputs` ([#64](https://github.com/AnswerDotAI/execnb/pull/64)), thanks to [@johnowhitaker](https://github.com/johnowhitaker)
+
+
 ## 0.1.8
 
 ### New Features
