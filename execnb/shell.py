@@ -130,6 +130,8 @@ def _out_nb(o, fmt):
     for x in o.display_objects: res.append(_mk_out(x.data, x.metadata))
     if r is not None and not o.quiet:
         res.append(_mk_out(*fmt.format(r), 'execute_result'))
+    if 'execution_count' not in o: o['execution_count']=None
+    for p in res: p['execution_count'] = o['execution_count']
     return res
 
 # %% ../nbs/02_shell.ipynb
@@ -194,10 +196,7 @@ def cell(self:CaptureShell, cell, stdout=True, stderr=True):
     if cell.cell_type!='code': return
     self._cell_idx = cell.idx_ + 1
     outs = self.run(cell.source)
-    if outs:
-        cell.outputs = _dict2obj(outs)
-        for o in outs:
-            if 'execution_count' in o: cell['execution_count'] = o['execution_count']
+    if outs: cell.outputs = _dict2obj(outs)
 
 # %% ../nbs/02_shell.ipynb
 def find_output(outp, # Output from `run`
