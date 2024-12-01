@@ -2,8 +2,8 @@
 
 d = { 'settings': { 'branch': 'master',
                 'doc_baseurl': '/execnb/',
-                'doc_host': 'https://fastai.github.io',
-                'git_url': 'https://github.com/fastai/execnb/',
+                'doc_host': 'https://AnswerDotAI.github.io',
+                'git_url': 'https://github.com/AnswerDotAI/execnb/',
                 'lib_path': 'execnb'},
   'syms': { 'execnb.nbio': { 'execnb.nbio.NbCell': ('nbio.html#nbcell', 'execnb/nbio.py'),
                              'execnb.nbio.NbCell.__eq__': ('nbio.html#nbcell.__eq__', 'execnb/nbio.py'),
