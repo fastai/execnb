@@ -3,7 +3,7 @@ project:
 
 website:
   title: "execnb"
-  site-url: "https://fastai.github.io/execnb/"
+  site-url: "https://AnswerDotAI.github.io/execnb/"
   description: "A description of your project"
   repo-branch: master
-  repo-url: "https://github.com/fastai/execnb/"
+  repo-url: "https://github.com/AnswerDotAI/execnb/"
