@@ -2,6 +2,11 @@
 
 <!-- do not remove -->
 
+## 0.1.10
+
+### Bugs Squashed
+
+- `execution_count` and traceback formatted incorrectly ([#66](https://github.com/AnswerDotAI/execnb/issues/66))
 
 
 ## 0.1.9
