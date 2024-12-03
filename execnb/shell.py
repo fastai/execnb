@@ -99,8 +99,8 @@ def run_cell(self:CaptureShell, raw_cell, store_history=False, silent=False, she
 
 # %% ../nbs/02_shell.ipynb
 def format_exc(e):
-    "Format exception `e` as a string"
-    return ''.join(traceback.format_exception(type(e), e, e.__traceback__))
+    "Format exception `e` as a string list"
+    return traceback.format_exception(type(e), e, e.__traceback__)
 
 # %% ../nbs/02_shell.ipynb
 def _out_stream(text, name): return dict(name=name, output_type='stream', text=text.splitlines(True))
@@ -131,7 +131,8 @@ def _out_nb(o, fmt):
     if r is not None and not o.quiet:
         res.append(_mk_out(*fmt.format(r), 'execute_result'))
     if 'execution_count' not in o: o['execution_count']=None
-    for p in res: p['execution_count'] = o['execution_count']
+    for p in res:
+        if p["output_type"]=="execute_result": p['execution_count'] = o['execution_count']
     return res
 
 # %% ../nbs/02_shell.ipynb
