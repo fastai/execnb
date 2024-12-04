@@ -18,7 +18,7 @@ from IPython.core.interactiveshell import InteractiveShell, ExecutionInfo, Execu
 from IPython.core.displayhook import DisplayHook
 from IPython.utils.capture import capture_output
 from IPython.utils.text import strip_ansi
-from IPython.core.completer import IPCompleter,provisionalcompleter
+from IPython.core.completer import IPCompleter,provisionalcompleter,Completer
 from IPython.core.hooks import CommandChainDispatcher
 from IPython.core.completerlib import module_completer
 from IPython.utils.strdispatch import StrDispatch
@@ -307,9 +307,9 @@ class SmartCompleter(IPCompleter):
     def __call__(self, c):
         if not c: return []
         with provisionalcompleter():
-            return [o.text.rpartition('.')[-1]
-                    for o in self.completions(c, len(c))
-                    if o.type not in ('magic', 'path')]
+            res = [o.text.rpartition('.')[-1] for o in self.completions(c, len(c)) if o.type!='magic']
+        if res and res[0][-1]=='=': res = [o for o in res if o[-1]=='=']
+        return res
 
 # %% ../nbs/02_shell.ipynb
 @patch
