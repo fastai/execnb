@@ -2,6 +2,13 @@
 
 <!-- do not remove -->
 
+## 0.1.11
+
+### New Features
+
+- Limit to param names in completions if available ([#67](https://github.com/AnswerDotAI/execnb/issues/67))
+
+
 ## 0.1.10
 
 ### Bugs Squashed
