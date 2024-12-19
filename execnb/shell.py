@@ -170,9 +170,10 @@ def render_outputs(outputs, ansi_renderer=_strip, include_imgs=True, pygments=Fa
     def render_output(out):
         otype = out['output_type']
         if otype == 'stream':
-            txt = ansi_renderer(''.join(out['text']))
+            txt = ansi_renderer(''.join(out["text"]))
             xtra = '' if out['name']=='stdout' else "class='stderr'"
-            return f"<pre {xtra}><code>{txt}</code></pre>"
+            is_err = '<span class' in txt
+            return f"<pre {xtra}><code class='{'nohighlight hljs' if is_err else ''}'>{txt}</code></pre>"
         elif otype in ('display_data','execute_result'):
             data = out['data']
             _g = lambda t: ''.join(data[t]) if t in data else None
