@@ -29,6 +29,8 @@ from html import escape
 try: from matplotlib_inline.backend_inline import set_matplotlib_formats
 except ImportError: set_matplotlib_formats = None
 
+from mistletoe import markdown, HTMLRenderer
+from mistletoe.contrib.pygments_renderer import PygmentsRenderer
 
 from .nbio import *
 from .nbio import _dict2obj
@@ -161,11 +163,13 @@ async def run_async(self:CaptureShell,
 def _pre(s, xtra=''): return f"<pre {xtra}><code>{escape(s)}</code></pre>"
 def _strip(s): return strip_ansi(escape(s))
 
-def render_outputs(outputs, ansi_renderer=_strip, include_imgs=True, pygments=False):
-    try:
-        from mistletoe import markdown, HTMLRenderer
-        from mistletoe.contrib.pygments_renderer import PygmentsRenderer
-    except ImportError: return print('mistletoe not found -- please install it')
+def render_outputs(outputs,
+        ansi_renderer=_strip,
+        include_imgs=True,
+        pygments=False,
+        pygments_renderer=PygmentsRenderer,
+        html_renderer=HTMLRenderer
+    ):
     renderer = PygmentsRenderer if pygments else HTMLRenderer
     def render_output(out):
         otype = out['output_type']
